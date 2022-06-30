@@ -15,6 +15,7 @@
     "node": ">=14.17.0"
   },
   "dependencies": {
+    "@mui/material": "^5.8.5",
     "electron-store": "^8.0.1"
   },
   "devDependencies": {
@@ -32,6 +33,8 @@
   },
   "env": {
     "VITE_DEV_SERVER_HOST": "127.0.0.1",
-    "VITE_DEV_SERVER_PORT": 7777
+    "VITE_DEV_SERVER_PORT": 7777,
+    "VITE_DEV_SERVER_HOST_INVISIBLE": "127.0.0.1",
+    "VITE_DEV_SERVER_PORT_INVISIBLE": 7778
   }
 }

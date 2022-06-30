@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 
@@ -49,6 +49,9 @@ async function createWindow() {
   })
 }
 
+ipcMain.on('makeWindow', () => {
+
+})
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
