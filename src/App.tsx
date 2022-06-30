@@ -1,72 +1,53 @@
-import { useState } from 'react'
-import electron from '/electron.png'
-import react from '/react.svg'
-import vite from '/vite.svg'
-import styles from 'styles/app.module.scss'
+import * as React from 'react';
+import HomeForm from './HomeForm';
+import NavigationBar from './NavigationBar';
+import PlaylistForm from './PlaylistForm';
+import { SearchForm } from './SearchForm';
+import SettingsForm from './SettingsForm';
+export default class App extends React.Component<any, any> {
+    navItems: string[];
+    constructor(props: any) {
+        super(props);
+        this.handleNavClick = this.handleNavClick.bind(this);
+        this.state = {
+            navItem: "Home",
+            Home: 'block',
+            Search: 'none',
+            Playlists: 'none',
+            Settings: 'none',
+        }
+        this.navItems = ['Home', 'Search', 'Playlists', 'Settings']
+    }
 
-const App: React.FC = () => {
-  const [count, setCount] = useState(0)
+    handleNavClick(navItem: string) {
+        this.navItems.forEach(n => {
+            this.setState({
+                [n]: navItem === n ? 'block' : 'none'
+            })
+        })
+    }
 
-  return (
-    <div className={styles.app}>
-      <header className={styles.appHeader}>
-        <div className={styles.logos}>
-          <div className={styles.imgBox}>
-            <img
-              src={electron}
-              style={{ height: '24vw' }}
-              className={styles.appLogo}
-              alt="electron"
-            />
-          </div>
-          <div className={styles.imgBox}>
-            <img src={vite} style={{ height: '19vw' }} alt="vite" />
-          </div>
-          <div className={styles.imgBox}>
-            <img
-              src={react}
-              style={{ maxWidth: '100%' }}
-              className={styles.appLogo}
-              alt="logo"
-            />
-          </div>
-        </div>
-        <p>Hello Electron + Vite + React!</p>
-        <p>
-          <button onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <div>
-          <a
-            className={styles.appLink}
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className={styles.appLink}
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-          <div className={styles.staticPublic}>
-            Place static files into the{' '}
-            <code>/public</code> folder
-            <img style={{ width: 77 }} src="./node.png" />
-          </div>
-        </div>
-      </header>
-    </div>
-  )
+    render() {
+        return (
+            <div>
+                <div>
+                    <NavigationBar navItems={['Home', 'Search', 'Playlists', 'Settings']} handleOnClick={this.handleNavClick} />
+                </div>
+                <div className="main">
+                    <div className="Home" style={{ display:this.state.Home}}>
+                        <HomeForm />
+                    </div>
+                    <div className="Search" style={{ display:this.state.Search}}>
+                        <SearchForm />
+                    </div>
+                    <div className="Playlists" style={{ display:this.state.Playlists}}>
+                        <PlaylistForm />
+                    </div>
+                    <div className="Settings" style={{ display:this.state.Settings}}>
+                        <SettingsForm />
+                    </div>
+                </div>
+            </div>
+        )
+    }
 }
-
-export default App

@@ -85,6 +85,7 @@ function useLoading() {
 // ----------------------------------------------------------------------
 
 const { appendLoading, removeLoading } = useLoading()
+//@ts-ignore
 window.removeLoading = removeLoading
 domReady().then(appendLoading)
 

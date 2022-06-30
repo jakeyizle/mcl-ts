@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
+const db = require('better-sqlite3')('melee.db');
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -52,7 +53,7 @@ async function createWindow() {
 ipcMain.on('makeWindow', () => {
 
 })
-app.whenReady().then(createWindow)
+app.whenReady().then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
   win = null
@@ -75,3 +76,72 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+
+
+function initDB() {
+  const gameStmt = db.prepare(`CREATE TABLE IF NOT EXISTS games (
+      name NOT NULL,
+      path Primary Key)`).run();
+  const conversionStmt = db.prepare(`CREATE TABLE IF NOT EXISTS conversions (
+      id Primary Key,
+      playerIndex,
+      opponentIndex
+      ,startFrame
+      ,endFrame
+      ,startPercent
+      ,currentPercent
+      ,endPercent
+      ,didKill
+      ,openingType
+      ,attackingPlayer
+      ,defendingPlayer
+      ,attackingCharacter
+      ,defendingCharacter
+      ,stage
+      ,percent
+      ,time
+      ,filepath
+      ,moveCount
+      ,startAt
+      ,zeroToDeath
+      ,moveString
+      ,damagePerFrame
+      ,FOREIGN KEY (filepath) REFERENCES games(path)
+  )`).run();
+  const movesStmt = db.prepare(`CREATE TABLE IF NOT EXISTS moves (
+      conversionMoveId INTEGER Primary Key,
+      conversionId,
+      moveId,
+      frame,
+      hitCount,
+      damage,
+      moveIndex,
+      inverseMoveIndex
+      ,FOREIGN KEY (conversionId) REFERENCES conversions(id)
+  )`).run();
+  const settingsStmt = db.prepare(`CREATE TABLE IF NOT EXISTS settings (
+    key Primary Key,
+    value
+  )`).run();
+  const playlistStmt = db.prepare(`CREATE TABLE IF NOT EXISTS playlists (
+    name Primary Key
+  )`).run();
+  const playlistConversionStmt = db.prepare(`CREATE TABLE IF NOT EXISTS playlistConversion (
+    playlistName,
+    conversionId,
+    playlistPosition,
+    PRIMARY KEY (playlistName, conversionId),
+    FOREIGN KEY (playlistName) REFERENCES playlists(name),
+    FOREIGN KEY (conversionId) REFERENCES conversions(id)
+  )`).run();
+  const errorGameStmt = db.prepare(`CREATE TABLE IF NOT EXISTS errorGame (
+    name NOT NULL,
+    Path Primary Key,
+    reason
+  )`).run();
+  db.prepare('CREATE INDEX IF NOT EXISTS search_index_2 ON conversions (attackingPlayer, attackingCharacter, defendingPlayer, defendingCharacter, stage, percent, moveCount, didKill)').run();
+  db.prepare('CREATE INDEX IF NOT EXISTS count_index ON conversions (id)').run();
+  db.prepare('CREATE INDEX IF NOT EXISTS attacking_index ON conversions (attackingPlayer)').run();
+  db.prepare('CREATE INDEX IF NOT EXISTS defending_index ON conversions (defendingPlayer)').run();
+}
