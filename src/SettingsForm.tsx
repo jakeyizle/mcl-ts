@@ -86,7 +86,7 @@ export default class SettingsForm extends React.Component<any, any> {
       >
         <div>
           {/*Material doesnt have a component that can do FOLDER input*/}
-          //@ts-ignore
+          {/*@ts-ignore*/}
           <input type="file" name="replayPath" webkitdirectory="true" ref={this.replayPath} onChange={() => this.handleInputChange} hidden />
           <Button variant="outlined" onClick={(e) => this.clickRefByName('replayPath')}>Set Replay Path</Button>
           {this.state.replayPath && <span>{this.state.replayPath}</span>}
@@ -102,7 +102,7 @@ export default class SettingsForm extends React.Component<any, any> {
           {this.state.dolphinPath && <span>{this.state.dolphinPath}</span>}
         </div>
         <div>
-          //@ts-ignore
+          {/*@ts-ignore*/}
           <Button variant="outlined" name="recordingPath" onClick={(e) => this.handleInputChange(e, dialog.showOpenDialogSync({ properties: ['openDirectory'] }))}>Set Path Where Recordings Will Be Saved</Button>
           {this.state.recordingPath && <span>{this.state.recordingPath}</span>}
         </div>
