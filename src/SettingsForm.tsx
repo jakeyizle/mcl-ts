@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Box, Button, FormControlLabel, Radio, RadioGroup, TextField, FormLabel } from "@mui/material";
-
 const dialog = require('electron').dialog;
 const db = require('better-sqlite3')('melee.db');
-const settingsStmt = db.prepare('SELECT value from settings where key = ?');
+const settingsStmt = db.prepare('SELECT value from settings where key = ?').pluck();
 const settingsUpsert = db.prepare('INSERT INTO settings (key, value) values (@key, @value) ON CONFLICT (key) DO UPDATE SET value = @value');
-
+let upsertTimeout: any;
+let lastUsedName: string;
 export default class SettingsForm extends React.Component<any, any> {
   replayPath: any;
   isoPath: any;
@@ -27,24 +27,25 @@ export default class SettingsForm extends React.Component<any, any> {
       postRoll: '',
       obsPassword: '',
       obsPort: '',
-      recordMethod: '',
+      recordMethod: false,
       recordingPath: ''
     }
   }
 
   componentDidMount() {
     for (const setting in this.state) {
-      let value = settingsStmt.get(setting)?.value || '';
+      let value = settingsStmt.get(setting);
       this.setState({
-        [setting]: value
+        [setting]: value ?? ''
       })
     }
   }
   //todo: clean up folder select
-  handleInputChange(event: any, folder: any) {
+  handleInputChange(event: any, folder: any = '') {
     const target = event.target;
     const name = target.name;
-    let value;
+    if (name === lastUsedName) clearTimeout(upsertTimeout);
+    let value: string;
     switch (target.type) {
       case 'file':
         const path = target.files[0]?.path;
@@ -52,7 +53,7 @@ export default class SettingsForm extends React.Component<any, any> {
         if (target.name === 'replayPath') {
           //get the directory of a file
           const regExp = /(.*\\)/;
-          value = regExp.exec(path)?.[0];
+          value = regExp.exec(path)?.[0]!;
         }
         break;
       case 'button':
@@ -66,7 +67,11 @@ export default class SettingsForm extends React.Component<any, any> {
     this.setState({
       [name]: value
     })
-    settingsUpsert.run({ key: name, value: value });
+    lastUsedName = name;
+    upsertTimeout = setTimeout(() => {
+      console.log('vroom')
+      settingsUpsert.run({ key: name, value: value });
+    }, 500)
   }
 
   clickRefByName(inputName: any) {
@@ -86,18 +91,17 @@ export default class SettingsForm extends React.Component<any, any> {
       >
         <div>
           {/*Material doesnt have a component that can do FOLDER input*/}
-          {/*@ts-ignore*/}
-          <input type="file" name="replayPath" webkitdirectory="true" ref={this.replayPath} onChange={() => this.handleInputChange} hidden />
+          <input type="file" name="replayPath" webkitdirectory="true" ref={this.replayPath} onChange={(e) => this.handleInputChange(e)} hidden />
           <Button variant="outlined" onClick={(e) => this.clickRefByName('replayPath')}>Set Replay Path</Button>
           {this.state.replayPath && <span>{this.state.replayPath}</span>}
         </div>
         <div>
-          <input type="file" name="isoPath" ref={this.isoPath} onChange={() => this.handleInputChange} hidden />
+          <input type="file" name="isoPath" ref={this.isoPath} onChange={(e) => this.handleInputChange(e)} hidden />
           <Button variant="outlined" onClick={(e) => this.clickRefByName('isoPath')}>Set SSBM Iso Path</Button>
           {this.state.isoPath && <span>{this.state.isoPath}</span>}
         </div>
         <div>
-          <input type="file" name="dolphinPath" ref={this.dolphinPath} onChange={() => this.handleInputChange} hidden />
+          <input type="file" name="dolphinPath" ref={this.dolphinPath} onChange={(e) => this.handleInputChange(e)} hidden />
           <Button variant="outlined" onClick={(e) => this.clickRefByName('dolphinPath')}>Set Playback Dolphin Path</Button>
           {this.state.dolphinPath && <span>{this.state.dolphinPath}</span>}
         </div>
@@ -107,20 +111,20 @@ export default class SettingsForm extends React.Component<any, any> {
           {this.state.recordingPath && <span>{this.state.recordingPath}</span>}
         </div>
         <div>
-          <TextField label="preRoll frames" type="number" placeholder="preRoll frames" onChange={() => this.handleInputChange} name="preRoll" value={this.state.preRoll} />
+          <TextField label="preRoll frames" InputLabelProps={{ shrink: true }} type="number" placeholder="preRoll frames" onChange={(e) => this.handleInputChange(e)} name="preRoll" value={this.state.preRoll} />
         </div>
         <div>
-          <TextField label="postRoll frames" type="number" placeholder="postRoll frames" onChange={() => this.handleInputChange} name="postRoll" value={this.state.postRoll} />
+          <TextField label="postRoll frames" InputLabelProps={{ shrink: true }} type="number" placeholder="postRoll frames" onChange={(e) => this.handleInputChange(e)} name="postRoll" value={this.state.postRoll} />
         </div>
         <div>
-          <TextField label="obsPassword" type="password" placeholder="obsPassword" onChange={() => this.handleInputChange} name="obsPassword" value={this.state.obsPassword} />
+          <TextField label="obsPassword" InputLabelProps={{ shrink: true }} type="password" placeholder="obsPassword" onChange={(e) => this.handleInputChange(e)} name="obsPassword" value={this.state.obsPassword} />
         </div>
         <div>
-          <TextField label="obsPort" type="number" placeholder="obsPort" onChange={() => this.handleInputChange} name="obsPort" value={this.state.obsPort} />
+          <TextField label="obsPort" type="number" placeholder="obsPort" onChange={(e) => this.handleInputChange(e)} name="obsPort" value={this.state.obsPort} />
         </div>
         <div>
           <FormLabel>Select recording method</FormLabel>
-          <RadioGroup row name="recordMethod" onChange={this.handleInputChange} value={this.state.recordMethod}>
+          <RadioGroup row name="recordMethod" onChange={(e) => this.handleInputChange(e)} value={this.state.recordMethod}>
             <FormControlLabel value="Dolphin" control={<Radio />} label="Dolphin" />
             <FormControlLabel value="OBS" control={<Radio />} label="OBS" />
           </RadioGroup>
@@ -135,7 +139,7 @@ declare module 'react' {
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     // extends React's HTMLAttributes
     directory?: string;
-    webkitdirectory?:string;
+    webkitdirectory?: string;
   }
 }
 declare module 'electron' {

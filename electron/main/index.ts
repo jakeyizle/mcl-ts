@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 const db = require('better-sqlite3')('melee.db');
 
 // Disable GPU Acceleration for Windows 7
@@ -53,7 +54,7 @@ async function createWindow() {
 ipcMain.on('makeWindow', () => {
 
 })
-app.whenReady().then(initDB).then(createWindow)
+app.whenReady().then(() => installExtension(REACT_DEVELOPER_TOOLS.id)).then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
   win = null
