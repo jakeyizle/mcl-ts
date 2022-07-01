@@ -26,4 +26,6 @@ release
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
-*.db
+/melee.db
+/melee.db-shm
+/melee.db-wal
