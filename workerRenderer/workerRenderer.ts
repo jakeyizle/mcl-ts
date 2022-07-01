@@ -4,7 +4,6 @@ const {
   v4: uuidv4
 } = require('uuid');
 import { ipcRenderer } from 'electron';
-
 //load files into database
 ipcRenderer.on('startLoad', async (event, message) => {
     console.log(message);
@@ -29,7 +28,7 @@ ipcRenderer.on('startLoad', async (event, message) => {
                 const metadata = game.getMetadata();
 
                 let conversions = game.getStats()!.conversions;
-                let moves = [];
+                let moves: Array<any> = [];
                 for (let j = 0; j < conversions.length; j++) {
                     //-123 is start of game
                     let defendingIndex = conversions[j].playerIndex
@@ -37,13 +36,13 @@ ipcRenderer.on('startLoad', async (event, message) => {
                     conversions[j].startFrame = conversions[j].startFrame || -123;
                     conversions[j].endFrame = conversions[j].endFrame || game.getLatestFrame()!.frame;
                     conversions[j].filePath = files[i].path;
-                    conversions[j].attackingPlayer = metadata.players[attackingIndex].names.code ?? '';
-                    conversions[j].defendingPlayer = metadata.players[defendingIndex].names.code;
-                    conversions[j].attackingCharacter = settings.players[attackingIndex].characterId;
-                    conversions[j].defendingCharacter = settings.players[defendingIndex].characterId;
-                    conversions[j].stage = settings.stageId;
+                    conversions[j].attackingPlayer = metadata?.players![attackingIndex]?.names?.code ?? '';
+                    conversions[j].defendingPlayer = metadata?.players![defendingIndex]?.names?.code ?? '';
+                    conversions[j].attackingCharacter = settings?.players[attackingIndex].characterId ?? -1;
+                    conversions[j].defendingCharacter = settings?.players[defendingIndex].characterId ?? -1;
+                    conversions[j].stage = settings?.stageId ?? -1;
                     conversions[j].percent = Math.round((conversions[j].currentPercent - conversions[j].startPercent) * 100) / 100;
-                    conversions[j].time = Math.round((conversions[j].endFrame - conversions[j].startFrame) * 100) / 100;
+                    conversions[j].time = Math.round(((conversions[j]!.endFrame ?? 0) - conversions[j].startFrame) * 100) / 100;
                     conversions[j].damagePerFrame = Math.round((conversions[j].percent / conversions[j].time) * 100) / 100;
                     conversions[j].opponentIndex = defendingIndex;
                     conversions[j].didKill = conversions[j].didKill ? 1 : 0;
@@ -56,7 +55,7 @@ ipcRenderer.on('startLoad', async (event, message) => {
                         conversions[j].moves[k].inverseMoveIndex = conversions[j].moves.length - (k + 1)
                     }
                     //otherwise all conversions in a game have same startAt date
-                    conversions[j].startAt = metadata.startAt + `${conversions[j].startFrame}F`;
+                    conversions[j].startAt = metadata?.startAt + `${conversions[j].startFrame}F`;
                     conversions[j].zeroToDeath = conversions[j].startPercent === 0 && conversions[j].didKill == 1 ? 1 : 0;
                     //changing string from 10,12,13 to ,10,12,13, prevents weird search issues
                     //LIKE %0,1% will return the above. By adding commas we can do LIKE %,0,1,%
@@ -66,13 +65,13 @@ ipcRenderer.on('startLoad', async (event, message) => {
                 }
                 insertGame.run(files[i]);
 
-                const insertManyConversions = db.transaction((data) => {
+                const insertManyConversions = db.transaction((data: any) => {
                     for (const obj of data) insertConversion.run(obj);
                 });
                 insertManyConversions(conversions);
 
                 //moves has to go after conversions cause foreign key is defined
-                const insertManyMoves = db.transaction((data) => {
+                const insertManyMoves = db.transaction((data: any) => {
                     for (const obj of data) insertMove.run(obj);
                 });
                 insertManyMoves(moves);
@@ -92,7 +91,7 @@ ipcRenderer.on('startLoad', async (event, message) => {
     });
 });
 
-function invertPlayerIndex(index) {
+function invertPlayerIndex(index: number) {
     return index == 0 ? 1 : 0;
 }
 
@@ -126,7 +125,16 @@ declare module '@slippi/slippi-js' {
     opponentIndex: number,
     //sqlite hates true/false
     didKill: number,
+    id: any,
+    moveCount: number,
+    startAt: string,
+    zeroToDeath: number,
+    moveString: string,
+  }
 
-
+  interface MoveLandedType {
+    conversionId: number,
+    moveIndex: number,
+    inverseMoveIndex: number
   }
 }

@@ -4,6 +4,7 @@ import { join } from 'path'
 import * as fs from 'fs';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 const db = require('better-sqlite3')('melee.db');
+db.pragma('journal_mode = WAL');
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -55,7 +56,7 @@ async function createWindow() {
 ipcMain.on('makeWindow', () => {
 
 })
-app.whenReady()/*.then(() => installExtension(REACT_DEVELOPER_TOOLS.id))*/.then(initDB).then(createWindow)
+app.whenReady().then(() => installExtension(REACT_DEVELOPER_TOOLS.id)).then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
   win = null
@@ -153,7 +154,6 @@ function initDB() {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 ipcMain.handle('startDatabaseLoad', async () => {
-  console.log(1)
   return await createDataWorkers();
 });
 
@@ -162,7 +162,6 @@ var dataLoadInProgress = false;
 var maxGamesToLoad = 0;
 var gamesLoaded = 0;
 async function createDataWorkers() {
-  console.log(2);
   if (dataLoadInProgress) {
     return { max: maxGamesToLoad, gamesLoaded: gamesLoaded };
   }
@@ -181,7 +180,6 @@ async function createDataWorkers() {
   maxGamesToLoad = files.length;
   //just picking a random number
   let windowCount = maxGamesToLoad < 10 ? 1 : (cpus().length || 1);
-  console.log('games', maxGamesToLoad)
   if (maxGamesToLoad > 0) {
     let fileIndexStart = 0;
     const range = Math.ceil(maxGamesToLoad / windowCount);
@@ -197,20 +195,19 @@ async function createDataWorkers() {
 
 ipcMain.handle('gameLoad', (event, args) => {
   gamesLoaded++
-  win?.webContents.send('gameLoad', { gamesLoaded: gamesLoaded });
+  win!.webContents.send('gameLoad', { gamesLoaded: gamesLoaded });
 })
 
 ipcMain.handle('finish', (event, args) => {
-  let win = BrowserWindow.getAllWindows().find(x => x.webContents.id == event.sender.id);
+  let worker = BrowserWindow.getAllWindows().find(x => x.webContents.id == event.sender.id);
   //sometimes this throws an error but the window closes anyways...
-  win?.close()
+  worker?.close()
   let openWindowCount = BrowserWindow.getAllWindows().length;
   dataLoadInProgress = openWindowCount === 1;
 })
 
 
 const createInvisWindow = (start: number, range: number, files: { path: string; name: string; }[]) => {
-  console.log('invis');
   let invisWindow = new BrowserWindow({
     show: !app.isPackaged,
     webPreferences: {
@@ -221,9 +218,9 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
   if (app.isPackaged) {
     invisWindow.loadFile(join(__dirname, '../../workerRendere/index.html'))
   } else {
-    console.log(workerUrl);
     invisWindow.loadURL(workerUrl)
-    // invisWindow.webContents.openDevTools()
+    //react dev tools does not appreciate other windows having dev tools open
+    //invisWindow.webContents.openDevTools()
   }
   invisWindow.webContents.once('did-finish-load', () => {
     invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })

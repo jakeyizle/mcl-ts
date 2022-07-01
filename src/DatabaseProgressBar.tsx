@@ -1,8 +1,7 @@
 import { Box, LinearProgress, Typography, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-// import { ipcRenderer } from 'electron/renderer'
+import { ipcRenderer } from 'electron';
 const db = require('better-sqlite3')('melee.db');
 import * as React from 'react';
-import {startDatabaseLoad, listenForLoadUpdate, removeLoadListener} from '../electron/preload/renderer';
 
 const gameCountStmt = db.prepare('SELECT COUNT (*) FROM games').pluck();
 const conversionCountStmt = db.prepare('SELECT COUNT (*) FROM conversions').pluck();
@@ -18,8 +17,10 @@ export default class DatabaseProgressBar extends React.Component<any, any> {
       windowCount: undefined,
       errorGames: errorStmt.all()
     }
+  }
 
-    listenForLoadUpdate((event: any, args: any) => {
+  componentDidMount() {
+    ipcRenderer.on('gameLoad', (event, args) => {
       this.setState(
         {
           gameCount: gameCountStmt.get(),
@@ -27,28 +28,18 @@ export default class DatabaseProgressBar extends React.Component<any, any> {
           currentLoadCount: args.gamesLoaded
         })
     })
-    // ipcRenderer.on('gameLoad', (event, args) => {
-    //   this.setState(
-    //     {
-    //       gameCount: gameCountStmt.get(),
-    //       conversionCount: conversionCountStmt.get(),
-    //       currentLoadCount: args.gamesLoaded
-    //     })
-    // })
-  }
 
-  componentDidMount() {
-    startDatabaseLoad().then((result) => {
+    ipcRenderer.invoke('startDatabaseLoad').then((result) => {
       this.setState({
         maxLoadCount: result.max,
         currentLoadCount: result.gameCount
       })
     })
+
   }
 
   componentWillUnmount() {
-    removeLoadListener();
-    // ipcRenderer.removeAllListeners('gameLoad');
+    ipcRenderer.removeAllListeners('gameLoad');
   }
 
   linearProgressWithLabel() {
