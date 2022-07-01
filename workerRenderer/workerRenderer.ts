@@ -4,8 +4,12 @@ const {
   v4: uuidv4
 } = require('uuid');
 import { ipcRenderer } from 'electron';
+let port: MessagePort;
+ipcRenderer.on('new-port', (event) => {
+  port = event.ports[0];
+})
 //load files into database
-ipcRenderer.on('startLoad', async (event, message) => {
+ipcRenderer.on('startLoad', async (event, message : {start: number, range: number, files:{path: string, name: string}[]}) => {
     console.log(message);
     (async () => {
         let {
@@ -83,7 +87,8 @@ ipcRenderer.on('startLoad', async (event, message) => {
                 }
             }
             finally {
-                ipcRenderer.invoke('gameLoad');
+                port?.postMessage('gameLoad');
+                // ipcRenderer.invoke('gameLoad');
             }
         }
     })().finally(() => {

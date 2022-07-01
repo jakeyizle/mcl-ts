@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, MessageChannelMain } from 'electron'
 import { release, cpus } from 'os'
 import { join } from 'path'
 import * as fs from 'fs';
@@ -149,14 +149,11 @@ function initDB() {
   db.prepare('CREATE INDEX IF NOT EXISTS defending_index ON conversions (defendingPlayer)').run();
 }
 
-
-
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 ipcMain.handle('startDatabaseLoad', async () => {
   return await createDataWorkers();
 });
-
 
 var dataLoadInProgress = false;
 var maxGamesToLoad = 0;
@@ -206,7 +203,6 @@ ipcMain.handle('finish', (event, args) => {
   dataLoadInProgress = openWindowCount === 1;
 })
 
-
 const createInvisWindow = (start: number, range: number, files: { path: string; name: string; }[]) => {
   let invisWindow = new BrowserWindow({
     show: !app.isPackaged,
@@ -222,11 +218,15 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
     //react dev tools does not appreciate other windows having dev tools open
     //invisWindow.webContents.openDevTools()
   }
+  const { port1, port2 } = new MessageChannelMain()
+
   invisWindow.webContents.once('did-finish-load', () => {
+    invisWindow.webContents.postMessage('new-port', null, [port1])
+    win?.webContents.postMessage('new-port', null, [port2])
     invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })
+
   })
 }
-
 
 //get all files in all subdirectories
 async function getFiles(path = "./") {
