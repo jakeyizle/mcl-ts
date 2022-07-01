@@ -4,7 +4,7 @@ const dialog = require('electron').dialog;
 const db = require('better-sqlite3')('melee.db');
 const settingsStmt = db.prepare('SELECT value from settings where key = ?').pluck();
 const settingsUpsert = db.prepare('INSERT INTO settings (key, value) values (@key, @value) ON CONFLICT (key) DO UPDATE SET value = @value');
-let upsertTimeout: any;
+let upsertTimeout: NodeJS.Timeout;
 let lastUsedName: string;
 export default class SettingsForm extends React.Component<any, any> {
   replayPath: any;
@@ -41,7 +41,7 @@ export default class SettingsForm extends React.Component<any, any> {
     }
   }
   //todo: clean up folder select
-  handleInputChange(event: any, folder: any = '') {
+  handleInputChange(event: any, folder: string[] = []) {
     const target = event.target;
     const name = target.name;
     if (name === lastUsedName) clearTimeout(upsertTimeout);

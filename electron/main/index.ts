@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { release } from 'os'
+import { release, cpus } from 'os'
 import { join } from 'path'
+import * as fs from 'fs';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 const db = require('better-sqlite3')('melee.db');
 
@@ -21,7 +22,7 @@ let win: BrowserWindow | null = null
 const splash = join(__dirname, '../preload/splash.js')
 // 🚧 Use ['ENV_NAME'] to avoid vite:define plugin
 const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`
-
+const workerUrl = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}/workerRenderer/index.html`
 async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
@@ -54,7 +55,7 @@ async function createWindow() {
 ipcMain.on('makeWindow', () => {
 
 })
-app.whenReady().then(() => installExtension(REACT_DEVELOPER_TOOLS.id)).then(initDB).then(createWindow)
+app.whenReady()/*.then(() => installExtension(REACT_DEVELOPER_TOOLS.id))*/.then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
   win = null
@@ -145,4 +146,121 @@ function initDB() {
   db.prepare('CREATE INDEX IF NOT EXISTS count_index ON conversions (id)').run();
   db.prepare('CREATE INDEX IF NOT EXISTS attacking_index ON conversions (attackingPlayer)').run();
   db.prepare('CREATE INDEX IF NOT EXISTS defending_index ON conversions (defendingPlayer)').run();
+}
+
+
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and import them here.
+ipcMain.handle('startDatabaseLoad', async () => {
+  console.log(1)
+  return await createDataWorkers();
+});
+
+
+var dataLoadInProgress = false;
+var maxGamesToLoad = 0;
+var gamesLoaded = 0;
+async function createDataWorkers() {
+  console.log(2);
+  if (dataLoadInProgress) {
+    return { max: maxGamesToLoad, gamesLoaded: gamesLoaded };
+  }
+  dataLoadInProgress = true;
+  maxGamesToLoad = 0;
+  gamesLoaded = 0;
+
+  const settingsStmt = db.prepare('SELECT value FROM settings WHERE key = ?')
+  const replayPath = settingsStmt.get('replayPath').value;
+  const localFiles = await getReplayFiles(replayPath);
+
+  const dbFiles = db.prepare('SELECT name FROM games').all().map((x: { name: any; }) => x.name);
+  const errorFiles = db.prepare('SELECT name FROM errorGame').all().map((x: { name: any; }) => x.name);
+  const alreadyLoadedFiles = dbFiles.concat(errorFiles);
+  const files = localFiles.filter((file) => !alreadyLoadedFiles.includes(file.name));
+  maxGamesToLoad = files.length;
+  //just picking a random number
+  let windowCount = maxGamesToLoad < 10 ? 1 : (cpus().length || 1);
+  console.log('games', maxGamesToLoad)
+  if (maxGamesToLoad > 0) {
+    let fileIndexStart = 0;
+    const range = Math.ceil(maxGamesToLoad / windowCount);
+    const finalRange = range + ((maxGamesToLoad + 1) % windowCount);
+    for (let i = 0; i < windowCount; i++) {
+      let fileRange = i + 1 === windowCount ? finalRange : range
+      createInvisWindow(fileIndexStart, fileRange, files);
+      fileIndexStart += fileRange;
+    }
+  }
+  return { max: maxGamesToLoad, gamesLoaded: gamesLoaded };
+}
+
+ipcMain.handle('gameLoad', (event, args) => {
+  gamesLoaded++
+  win?.webContents.send('gameLoad', { gamesLoaded: gamesLoaded });
+})
+
+ipcMain.handle('finish', (event, args) => {
+  let win = BrowserWindow.getAllWindows().find(x => x.webContents.id == event.sender.id);
+  //sometimes this throws an error but the window closes anyways...
+  win?.close()
+  let openWindowCount = BrowserWindow.getAllWindows().length;
+  dataLoadInProgress = openWindowCount === 1;
+})
+
+
+const createInvisWindow = (start: number, range: number, files: { path: string; name: string; }[]) => {
+  console.log('invis');
+  let invisWindow = new BrowserWindow({
+    show: !app.isPackaged,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  if (app.isPackaged) {
+    invisWindow.loadFile(join(__dirname, '../../workerRendere/index.html'))
+  } else {
+    console.log(workerUrl);
+    invisWindow.loadURL(workerUrl)
+    // invisWindow.webContents.openDevTools()
+  }
+  invisWindow.webContents.once('did-finish-load', () => {
+    invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })
+  })
+}
+
+
+//get all files in all subdirectories
+async function getFiles(path = "./") {
+  const entries = fs.readdirSync(path, {
+    withFileTypes: true
+  });
+  // Get files within the current directory and add a path key to the file objects
+  const files = entries
+    .filter(file => !file.isDirectory())
+    .map(file => ({
+      ...file,
+      path: path + file.name
+    }));
+
+  // Get folders within the current directory
+  const folders = entries.filter(folder => folder.isDirectory());
+
+  for (const folder of folders)
+    /*
+      Add the found files within the subdirectory to the files array by calling the
+      current function itself
+    */
+    files.push(...await getFiles(`${path}${folder.name}/`));
+
+  return files;
+}
+
+async function getReplayFiles(path: string | undefined) {
+  let files = await getFiles(path);
+  //ends in .slp
+  let regExp = /.*\.slp$/;
+  let replays = files.filter(file => regExp.test(file.name));
+  return replays;
 }

@@ -94,6 +94,8 @@ export function makeWindow() {
   ipcRenderer.send('makeWindow')
 }
 
+
+
 export function logDb() {
   console.log(db.prepare('select * from settings').all());
 }

@@ -436,8 +436,6 @@ export class SearchForm extends React.Component<any, any> {
           }
         </Box>
       </div>
-
-
     );
   }
 }
