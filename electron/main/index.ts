@@ -38,7 +38,7 @@ async function createWindow() {
     win.loadFile(join(__dirname, '../../index.html'))
   } else {
     win.loadURL(url)
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
   }
 
   // Test active push message to Renderer-process
@@ -221,10 +221,7 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
   const { port1, port2 } = new MessageChannelMain()
 
   invisWindow.webContents.once('did-finish-load', () => {
-    invisWindow.webContents.postMessage('new-port', null, [port1])
-    win?.webContents.postMessage('new-port', null, [port2])
     invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })
-
   })
 }
 

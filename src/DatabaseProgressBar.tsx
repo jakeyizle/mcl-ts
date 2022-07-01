@@ -5,8 +5,6 @@ import * as React from 'react';
 
 const gameCountStmt = db.prepare('SELECT COUNT (*) FROM games').pluck();
 const conversionCountStmt = db.prepare('SELECT COUNT (*) FROM conversions').pluck();
-const errorStmt = db.prepare('SELECT * FROM errorGame');
-let currentCount: number = 0;
 export default class DatabaseProgressBar extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
@@ -19,39 +17,25 @@ export default class DatabaseProgressBar extends React.Component<any, any> {
   }
 
   componentDidMount() {
-    // ipcRenderer.on('gameLoad', (event, args) => {
-    //   this.setState(
-    //     {
-    //       gameCount: gameCountStmt.get(),
-    //       conversionCount: conversionCountStmt.get(),
-    //       currentLoadCount: args.gamesLoaded
-    //     })
-    // })
+    ipcRenderer.on('gameLoad', (event, args) => {
+      this.setState(
+        {
+          gameCount: gameCountStmt.get(),
+          conversionCount: conversionCountStmt.get(),
+          currentLoadCount: args.gamesLoaded
+        })
+    })
 
     ipcRenderer.invoke('startDatabaseLoad').then((result) => {
-      console.log(result);
       this.setState({
         maxLoadCount: result.max,
         currentLoadCount: result.gameCount
       })
     })
-
-    ipcRenderer.on('new-port', (event) => {
-      const [port] = event.ports;
-      console.log(this.state.currentLoadCount);
-      port.onmessage = (event) => {
-        currentCount++;
-        this.setState({
-          gameCount: gameCountStmt.get(),
-          conversionCount: conversionCountStmt.get(),
-          currentLoadCount: currentCount
-        })
-      }
-    })
   }
 
   componentWillUnmount() {
-    // ipcRenderer.removeAllListeners('gameLoad');
+    ipcRenderer.removeAllListeners('gameLoad');
   }
 
   linearProgressWithLabel() {
