@@ -51,8 +51,12 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
+  win.on('close', () => {
+    //fuck osx
+    //tried browserWindow.foreach.close but causes a stack overflow
+    app.quit();
+  })
 }
-
 app.whenReady().then(() => installExtension(REACT_DEVELOPER_TOOLS.id)).then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
@@ -207,7 +211,7 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
     },
   });
   if (app.isPackaged) {
-    invisWindow.loadFile(join(__dirname, '../../workerRendere/index.html'))
+    invisWindow.loadFile(join(__dirname, '../../workerRenderer/index.html'))
   } else {
     invisWindow.loadURL(workerUrl)
     //react dev tools does not appreciate other windows having dev tools open
