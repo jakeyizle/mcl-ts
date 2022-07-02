@@ -1,12 +1,14 @@
-The idea behind this project is to go over all of your SSBM slippi replay files and get the conversions (as defined by slippi-js, basically combos). These are stored in a sqlite database, which we can search from. You can assign conversions to playlists, and then play them and record them (using OBS or dolphin frame dump and eventually upload them to gfycat). There are several settings that need to be set.
+The idea behind this project is to be able to search your combos and make/record several combos back-to-back (a playlist).
+Currently this supports native Dolphin recording, and using OBS.
 
 PLATFORMS:
 
-    Windows (see releases)
+    Windows/Osx/Ubunutu
+    I have only tested the windows release 
 
 Versioning:
 
-    Expect every release to contain breaking changes for the foreseeable future
+    Updating should work
 
 Security:
 
@@ -23,7 +25,7 @@ How to use:
     Settings:
         Replay Path - Select the folder where your Slippi replays are stored (usually like Documents\Slippi)
         SSBM ISO Path - Select your SSBM ISO - any ISO that works with Slippi will work (ex: Animelee, Crystal, Diet)
-        Playback Dolphin Path - Open Slippi Launcher -> Settings -> Dolphin Settings -> Playback -> Open Containing Folder -> Use that Dolphin.exe. This is a special Dolphin for playing back replays
+        Playback Dolphin Path - Open Slippi Launcher -> Settings -> Dolphin Settings -> Playback -> Open Containing Folder -> Use that Dolphin.exe. This is a special Dolphin for playing replays.
         Recording Path - where you want recordings to be saved
         Preroll frames - This will start combos earlier, so "30" would start the combo 30 frames before it actually begins
         Postroll frames - This will extend the end of the combo, so "45" would include 45 frames after the end of the combo
@@ -50,25 +52,23 @@ TODO (no particular order):
 
     Add option for gfycat uploading
     Add option for recordings of playlists to be split into different files
-    More search options (search based on moves in conversion, etc)
+    More search options
         AFTER/BEFORE date
-    Better table display (configurable columns?)
-        after page 2 stuff starts to get cut off
-        create playlists in dropdown in table
+        True Combo?
+        DidKill take into account ragequits
+    Create playlists in dropdown in table
     Game/converion stat breakdown
         Form to select Player and get stats?
         Show stats over time
     Analysis of playlists to predict/suggest additions
-    Make the code consisent and look sane
-    Webpack/PROD babel build of code
+    Make the code consisent and look sane    
     Conversion-level preroll/postroll overrides in playlists
     Add loading icon to long operations
 
 ISSUES:
 
     Need database migration system, currently have to delete DB everytime
-        Electron update!
-    Load up is very slow
+        Electron update!    
     First search call is slow
-        Must be an indexing thing - only happens on very first call
+        Not an index issue - it's a cold start issue
     React components getting out of hand
