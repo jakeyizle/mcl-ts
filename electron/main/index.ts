@@ -53,9 +53,6 @@ async function createWindow() {
   })
 }
 
-ipcMain.on('makeWindow', () => {
-
-})
 app.whenReady().then(() => installExtension(REACT_DEVELOPER_TOOLS.id)).then(initDB).then(createWindow)
 
 app.on('window-all-closed', () => {
@@ -79,8 +76,6 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-
 
 function initDB() {
   const gameStmt = db.prepare(`CREATE TABLE IF NOT EXISTS games (
