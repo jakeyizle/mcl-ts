@@ -27,6 +27,7 @@ const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_D
 const workerUrl = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}/workerRenderer.html`
 async function createWindow() {
   win = new BrowserWindow({
+    show: false,
     title: 'Main window',
     webPreferences: {
       preload: splash,
@@ -44,6 +45,8 @@ async function createWindow() {
 
   // Test active push message to Renderer-process
   win.webContents.on('did-finish-load', () => {
+    win?.maximize();
+    win?.show();
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
