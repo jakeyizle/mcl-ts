@@ -16,7 +16,7 @@
         "provider": "github",
         "owner": "jakeyizle",
         "repo": "mcl-ts",
-        "releaseType: "release"
+        "releaseType": "release"
       }
   ],
   files: ["dist"],
