@@ -4,7 +4,8 @@ import * as React from 'react';
 import { playAndRecordConversions, isOBSOn } from './commonFunctions.js'
 const { dialog } = require('electron');
 import ConversionDataGrid from './ConversionDataGrid.js';
-const db = require('better-sqlite3')('melee.db');
+import Database from './database'
+const db = Database.GetInstance();
 const filter = createFilterOptions();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?');
 

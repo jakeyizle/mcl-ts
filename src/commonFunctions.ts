@@ -4,7 +4,8 @@ import { exec, spawnSync } from 'child_process';
 import split from "lodash/split";
 import each from "lodash/each";
 import OBSWebsocket from 'obs-websocket-js';
-const db = require('better-sqlite3')('melee.db');
+import Database from './database'
+const db = Database.GetInstance();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?');
 
 export const playAndRecordConversions = async function playAndRecordConversions(conversions: Array<any>, recordConversions: Boolean = false, recordingPath: string = '', recordingName: string = '') {

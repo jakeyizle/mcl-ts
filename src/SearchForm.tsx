@@ -3,8 +3,8 @@ import { Characters, Stages, CharacterStrings, StageStrings, moves } from './sta
 // import Button from '@mui/material/Button';
 import { TextField, Button, Checkbox, Box, FormControlLabel, Select, FormControl, Autocomplete, MenuItem, Grid, CircularProgress } from '@mui/material';
 import ConversionDataGrid from './ConversionDataGrid';
-const db = require('better-sqlite3')('melee.db');
-
+import Database from './database'
+const db = Database.GetInstance();
 export class SearchForm extends React.Component<any, any> {
   newMaxPageNumber: number;
   characters: any;

@@ -3,8 +3,8 @@ import { release, cpus } from 'os'
 import { join } from 'path'
 import * as fs from 'fs';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
-const db = require('better-sqlite3')('melee.db');
-db.pragma('journal_mode = WAL');
+import Database from '../../src/database'
+const db = Database.GetInstance();
 import { autoUpdater } from "electron-updater";
 autoUpdater.checkForUpdatesAndNotify()
 // Disable GPU Acceleration for Windows 7

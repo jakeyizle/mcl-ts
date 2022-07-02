@@ -1,7 +1,7 @@
 import * as React from 'react';
 import DatabaseProgressBar from './DatabaseProgressBar';
-const db = require('better-sqlite3')('melee.db');
-
+import Database from './database'
+const db = Database.GetInstance();
 export default class HomeForm extends React.Component<any, any> {
   constructor(props: any) {
     super(props)

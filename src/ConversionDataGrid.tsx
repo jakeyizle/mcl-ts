@@ -5,7 +5,8 @@ import { Characters, Stages, CharacterStrings, StageStrings, moves } from './sta
 import { DataGrid, GridToolbarContainer, GridToolbarColumnsButton, GridToolbarDensitySelector, GridToolbarExport } from '@mui/x-data-grid';
 import { Autocomplete, Button, MenuItem, TextField, Select, FormControl, InputLabel, FormLabel, ButtonGroup } from '@mui/material';
 
-const db = require('better-sqlite3')('melee.db');
+import Database from './database'
+const db = Database.GetInstance();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?');
 
 function CustomToolbar() {

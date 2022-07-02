@@ -1,6 +1,7 @@
 import { Box, LinearProgress, Typography, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import { ipcRenderer } from 'electron';
-const db = require('better-sqlite3')('melee.db');
+import Database from './database'
+const db = Database.GetInstance();
 import * as React from 'react';
 
 const gameCountStmt = db.prepare('SELECT COUNT (*) FROM games').pluck();

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Box, Button, FormControlLabel, Radio, RadioGroup, TextField, FormLabel } from "@mui/material";
 const dialog = require('electron').dialog;
-const db = require('better-sqlite3')('melee.db');
+import Database from './database'
+const db = Database.GetInstance();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?').pluck();
 const settingsUpsert = db.prepare('INSERT INTO settings (key, value) values (@key, @value) ON CONFLICT (key) DO UPDATE SET value = @value');
 let upsertTimeout: NodeJS.Timeout;
