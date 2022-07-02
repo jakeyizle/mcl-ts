@@ -1,7 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import { exec, spawnSync } from 'child_process';
-import _ from "lodash";
+import split from "lodash/split";
+import each from "lodash/each";
 import OBSWebsocket from 'obs-websocket-js';
 const db = require('better-sqlite3')('melee.db');
 const settingsStmt = db.prepare('SELECT value from settings where key = ?');
@@ -79,14 +80,12 @@ export const isOBSOn = async function isOBSOn() {
 async function playConversions(replayCommand: string) {
   return new Promise<void>((resolve, reject) => {
     var dolphinProcess = exec(replayCommand);
-    if (dolphinProcess) {
-      dolphinProcess?.stdout?.on('data', (line) => {
-        if (line.includes('[NO_GAME]')) {
-          spawnSync("taskkill", ["/pid", `${dolphinProcess.pid}`, '/f', '/t']);
-          resolve();
-        }
-      })
-    }
+    dolphinProcess?.stdout?.on('data', (line) => {
+      if (line.includes('[NO_GAME]')) {
+        spawnSync("taskkill", ["/pid", `${dolphinProcess.pid}`, '/f', '/t']);
+        resolve();
+      }
+    })
   })
 }
 
@@ -113,9 +112,11 @@ function getReplayCommand(conversions: any) {
     };
     output.queue.push(queueMessage);
   }
-  let jsonPath = __dirname.includes('app.asar')
+  let jsonPath = __dirname.includes('.asar')
     ? path.join(__dirname, '..', '..', 'tempMoments.json')
     : path.join(__dirname, "tempMoments.json");
+
+  console.log(jsonPath);
   //if i use the json directly it doesnt work, so have to write it to a file first
   fs.writeFileSync(jsonPath, JSON.stringify(output));
   //pretty sure only the -i and -e are needed?
@@ -137,9 +138,9 @@ async function recordReplayWithOBS(replayCommand: string) {
 
       var dolphinProcess = exec(replayCommand)
       dolphinProcess?.stdout?.on('data', (line) => {
-        const commands = _.split(line, "\r\n");
-        _.each(commands, async (command: any) => {
-          command = _.split(command, " ");
+        const commands = split(line, "\r\n");
+        each(commands, async (command: any) => {
+          command = split(command, " ");
           // console.log(command);
           if (command[0] === '[PLAYBACK_START_FRAME]') {
             startFrame = parseInt(command[1]);

@@ -170,8 +170,8 @@ async function createDataWorkers() {
   const replayPath = settingsStmt.get('replayPath').value;
   const localFiles = await getReplayFiles(replayPath);
 
-  const dbFiles = db.prepare('SELECT name FROM games').all().map((x: { name: any; }) => x.name);
-  const errorFiles = db.prepare('SELECT name FROM errorGame').all().map((x: { name: any; }) => x.name);
+  const dbFiles = db.prepare('SELECT name FROM games').all().map((x: { name: string; }) => x.name);
+  const errorFiles = db.prepare('SELECT name FROM errorGame').all().map((x: { name: string; }) => x.name);
   const alreadyLoadedFiles = dbFiles.concat(errorFiles);
   const files = localFiles.filter((file) => !alreadyLoadedFiles.includes(file.name));
   maxGamesToLoad = files.length;

@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron"
-const db = require('better-sqlite3')('melee.db');
+
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
@@ -89,13 +89,3 @@ const { appendLoading, removeLoading } = useLoading()
 //@ts-ignore
 window.removeLoading = removeLoading
 domReady().then(appendLoading)
-
-export function makeWindow() {
-  ipcRenderer.send('makeWindow')
-}
-
-
-
-export function logDb() {
-  console.log(db.prepare('select * from settings').all());
-}
