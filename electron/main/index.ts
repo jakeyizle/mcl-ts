@@ -5,8 +5,9 @@ import * as fs from 'fs';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import Database from '../../src/database'
 const db = Database.GetInstance();
-import { autoUpdater } from "electron-updater";
-autoUpdater.checkForUpdatesAndNotify()
+//updates reset the database :(
+// import { autoUpdater } from "electron-updater";
+// autoUpdater.checkForUpdatesAndNotify()
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 
