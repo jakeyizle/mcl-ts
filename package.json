@@ -2,7 +2,7 @@
   "name": "mcl-ts",
   "productName": "Electron",
   "private": true,
-  "version": "2.0.11",
+  "version": "0.0.1",
   "description": "Melee Combo Loader",
   "author": "jakeyizle",
   "license": "MIT",
@@ -47,8 +47,6 @@
   },
   "env": {
     "VITE_DEV_SERVER_HOST": "127.0.0.1",
-    "VITE_DEV_SERVER_PORT": 7777,
-    "VITE_DEV_SERVER_HOST_INVISIBLE": "127.0.0.1",
-    "VITE_DEV_SERVER_PORT_INVISIBLE": 7778
+    "VITE_DEV_SERVER_PORT": 7777
   }
 }
