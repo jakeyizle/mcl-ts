@@ -14,7 +14,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'index.html'),
-        workerRenderer: resolve(__dirname, 'workerRenderer/index.html'),
+        workerRenderer: resolve(__dirname, 'workerRenderer.html'),
         // searchRenderer: resolve(__dirname, 'searchRenderer/index.html')
       },
     }

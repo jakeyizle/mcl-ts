@@ -76,7 +76,7 @@ ipcRenderer.on('startLoad', async (event, message : {start: number, range: numbe
                     for (const obj of data) insertMove.run(obj);
                 });
                 insertManyMoves(moves);
-            } catch (e) {
+            } catch (e: any) {
                 console.log(e);
                 if (currentFile) {
                     currentFile.reason = e.message || e;

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, MessageChannelMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { release, cpus } from 'os'
 import { join } from 'path'
 import * as fs from 'fs';
@@ -23,7 +23,7 @@ let win: BrowserWindow | null = null
 const splash = join(__dirname, '../preload/splash.js')
 // 🚧 Use ['ENV_NAME'] to avoid vite:define plugin
 const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`
-const workerUrl = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}/workerRenderer/index.html`
+const workerUrl = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}/workerRenderer.html`
 async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
@@ -211,14 +211,12 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
     },
   });
   if (app.isPackaged) {
-    invisWindow.loadFile(join(__dirname, '../../workerRenderer/index.html'))
+    invisWindow.loadFile(join(__dirname, '../../workerRenderer.html'))
   } else {
     invisWindow.loadURL(workerUrl)
     //react dev tools does not appreciate other windows having dev tools open
     //invisWindow.webContents.openDevTools()
   }
-  const { port1, port2 } = new MessageChannelMain()
-
   invisWindow.webContents.once('did-finish-load', () => {
     invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })
   })
