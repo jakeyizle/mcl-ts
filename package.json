@@ -2,7 +2,7 @@
   "name": "mcl-ts",
   "productName": "Electron",
   "private": true,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Melee Combo Loader",
   "author": "jakeyizle",
   "license": "MIT",
