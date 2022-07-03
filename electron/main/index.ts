@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { release, cpus } from 'os'
 import { join } from 'path'
 import * as fs from 'fs';
@@ -7,7 +7,7 @@ import { autoUpdater } from "electron-updater";
 autoUpdater.checkForUpdatesAndNotify()
 
 const appDataPath = app.getPath('appData');
-import Database from '../../src/database'
+import Database from '../../src/scripts/database'
 const db = Database.GetInstance(appDataPath);
 
 // Disable GPU Acceleration for Windows 7
@@ -263,6 +263,11 @@ async function getReplayFiles(path: string | undefined) {
   return replays;
 }
 
-ipcMain.once('getAppDataPath', (event) => {
+ipcMain.on('getAppDataPath', (event) => {
   event.returnValue = appDataPath;
+})
+
+ipcMain.handle('showOpenDialog', async (event, args)=> {
+  let folder = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+  return folder.filePaths;
 })
