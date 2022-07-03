@@ -3,11 +3,13 @@ import { release, cpus } from 'os'
 import { join } from 'path'
 import * as fs from 'fs';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import { autoUpdater } from "electron-updater";
+autoUpdater.checkForUpdatesAndNotify()
+
+const appDataPath = app.getPath('appData');
 import Database from '../../src/database'
-const db = Database.GetInstance();
-//updates reset the database :(
-// import { autoUpdater } from "electron-updater";
-// autoUpdater.checkForUpdatesAndNotify()
+const db = Database.GetInstance(appDataPath);
+
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 
@@ -223,7 +225,7 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
     //invisWindow.webContents.openDevTools()
   }
   invisWindow.webContents.once('did-finish-load', () => {
-    invisWindow.webContents.send('startLoad', { start: start, range: range, files: files })
+    invisWindow.webContents.send('startLoad', { start: start, range: range, files: files, appDataPath: appDataPath })
   })
 }
 
@@ -260,3 +262,7 @@ async function getReplayFiles(path: string | undefined) {
   let replays = files.filter(file => regExp.test(file.name));
   return replays;
 }
+
+ipcMain.once('getAppDataPath', (event) => {
+  event.returnValue = appDataPath;
+})

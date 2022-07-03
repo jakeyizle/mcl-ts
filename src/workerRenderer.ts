@@ -1,20 +1,21 @@
 import { SlippiGame } from "@slippi/slippi-js";
-const db = require('better-sqlite3')('melee.db');
 const {
   v4: uuidv4
 } = require('uuid');
 import { ipcRenderer } from 'electron';
+import {join} from 'path';
 
 //load files into database
-ipcRenderer.on('startLoad', async (event, message: { start: number, range: number, files: { path: string, name: string }[] }) => {
-  console.log(message);
+ipcRenderer.on('startLoad', async (event, message: { start: number, range: number, files: { path: string, name: string }[], appDataPath: string }) => {
   (async () => {
     let {
       start,
       range,
-      files
+      files,
+      appDataPath
     } = message;
     let end = start + range;
+    const db = require('better-sqlite3')(join(appDataPath,'melee.db'));
 
     const insertGame = db.prepare("INSERT OR IGNORE INTO GAMES (name, path) VALUES (@name, @path)");
     const insertConversion = db.prepare("INSERT OR IGNORE INTO conversions (damagePerFrame, moveString, zeroToDeath, startAt, moveCount, id, filepath, playerIndex,opponentIndex,startFrame,endFrame,startPercent,currentPercent,endPercent,didKill,openingType,attackingPlayer,defendingPlayer,attackingCharacter,defendingCharacter,stage,percent,time) VALUES (@damagePerFrame, @moveString, @zeroToDeath, @startAt, @moveCount, @id, @filePath, @playerIndex,@opponentIndex,@startFrame,@endFrame,@startPercent,@currentPercent,@endPercent,@didKill,@openingType,@attackingPlayer,@defendingPlayer,@attackingCharacter,@defendingCharacter,@stage,@percent,@time)")
@@ -98,18 +99,18 @@ function invertPlayerIndex(index: number) {
 
 //search for conversions in database
 //{ prepQuery, queryObject }
-ipcRenderer.on('search', async (event, message) => {
-  let start = Date.now();
-  try {
-    let { query, queryObject } = message;
-    let prepQuery = db.prepare(query);
-    let searchConversions = queryObject ? prepQuery.all(queryObject) : prepQuery.all();
-    ipcRenderer.send('searchFinish', searchConversions);
-  } catch (e) { }
-  finally {
-    console.log(Date.now() - start)
-  }
-});
+// ipcRenderer.on('search', async (event, message) => {
+//   let start = Date.now();
+//   try {
+//     let { query, queryObject } = message;
+//     let prepQuery = db.prepare(query);
+//     let searchConversions = queryObject ? prepQuery.all(queryObject) : prepQuery.all();
+//     ipcRenderer.send('searchFinish', searchConversions);
+//   } catch (e) { }
+//   finally {
+//     console.log(Date.now() - start)
+//   }
+// });
 
 //make typescript stfu
 declare module '@slippi/slippi-js' {

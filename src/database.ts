@@ -1,18 +1,22 @@
 const Database = require('better-sqlite3');
+import { join } from 'path';
+import { ipcRenderer} from 'electron';
+//putting db in application path makes updates overwrite it
 
 class DatabaseConnection {
   private constructor() {
-    console.log('constructing')
   }
-
+  private static _appDataPath: string = '';
   private static _instance: any
-  public static GetInstance = () => {
+  public static GetInstance = (appDataPath: string = '') => {
     if (this._instance) {
-      console.log('returing existing');
       return this._instance
     }
-    console.log('making new instance');
-    this._instance = new Database('melee.db');
+    this._appDataPath ||= appDataPath;
+    if (!appDataPath && !this._appDataPath) {
+      this._appDataPath = ipcRenderer.sendSync('getAppDataPath');
+    }
+    this._instance = new Database(join(this._appDataPath, 'melee.db'));
     this._instance.pragma('journal_mode = WAL');
     return this._instance;
   }

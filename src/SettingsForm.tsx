@@ -5,8 +5,7 @@ import Database from './database'
 const db = Database.GetInstance();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?').pluck();
 const settingsUpsert = db.prepare('INSERT INTO settings (key, value) values (@key, @value) ON CONFLICT (key) DO UPDATE SET value = @value');
-let upsertTimeout: NodeJS.Timeout;
-let lastUsedName: string;
+
 export default class SettingsForm extends React.Component<any, any> {
   replayPath: any;
   isoPath: any;
@@ -45,7 +44,6 @@ export default class SettingsForm extends React.Component<any, any> {
   handleInputChange(event: any, folder: string[] = []) {
     const target = event.target;
     const name = target.name;
-    if (name === lastUsedName) clearTimeout(upsertTimeout);
     let value: string;
     switch (target.type) {
       case 'file':
@@ -68,11 +66,7 @@ export default class SettingsForm extends React.Component<any, any> {
     this.setState({
       [name]: value
     })
-    lastUsedName = name;
-    upsertTimeout = setTimeout(() => {
-      console.log('vroom')
-      settingsUpsert.run({ key: name, value: value });
-    }, 500)
+    settingsUpsert.run({ key: name, value: value });
   }
 
   clickRefByName(inputName: any) {
