@@ -4,7 +4,7 @@ import { join } from 'path';
 import { ipcRenderer } from 'electron';
 //putting db in application path makes updates overwrite it
 //actually gets created twice, once in main-world and once in renderer-world
-//ipcRenderer is not available when this is in main-world, but main can pass in the appDataPath
+//ipcRenderer is not available when this is in main-world, but main can pass in the appDataPath so it never actually gets called in main-world
 class DatabaseConnection {
   private constructor() {}
   private static _appDataPath: string = '';

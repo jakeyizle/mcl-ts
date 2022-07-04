@@ -1,9 +1,12 @@
 import * as React from 'react';
 import { Characters, Stages, CharacterStrings, StageStrings, moves } from '../static/meleeIds';
-// import Button from '@mui/material/Button';
 import { TextField, Button, Checkbox, Box, FormControlLabel, Select, FormControl, Autocomplete, MenuItem, Grid, CircularProgress } from '@mui/material';
 import ConversionDataGrid from './ConversionDataGrid';
 import Database from '../scripts/database'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker-cssmodules.css'
+import { parseISO } from 'date-fns';
 const db = Database.GetInstance();
 export class SearchForm extends React.Component<any, any> {
   newMaxPageNumber: number;
@@ -26,6 +29,8 @@ export class SearchForm extends React.Component<any, any> {
       maximumDamage: '',
       minimumMove: '',
       maximumMove: '',
+      beforeDate: '',
+      afterDate: '',
       conversions: [],
       pageNumber: 0,
       maxPageNumber: undefined,
@@ -98,6 +103,13 @@ export class SearchForm extends React.Component<any, any> {
       [name]: stateValue
     })
   }
+
+  handleDateChange(date: Date, name: string) {
+    this.setState({
+      [name]: date
+    });
+  }
+
   clearConversions() {
     this.setState({
       conversions: []
@@ -158,6 +170,20 @@ export class SearchForm extends React.Component<any, any> {
     if (this.state.zeroToDeath) {
       whereString += ' AND zeroToDeath = 1'
     }
+    if (this.state.afterDate) {
+      let dateRegEx = /^[^T]*/
+      let isoDate = this.state.afterDate.toISOString();
+      let dateString = dateRegEx.exec(isoDate)?.[0];
+      whereString += ' AND date >= @afterDate';
+      queryObject.afterDate = dateString;
+    }
+    if (this.state.beforeDate) {
+      let dateRegEx = /^[^T]*/
+      let isoDate = this.state.beforeDate.toISOString();
+      let dateString = dateRegEx.exec(isoDate)?.[0];
+      whereString += ' AND date <= @beforeDate';
+      queryObject.beforeDate = dateString;
+    }
     if (this.state.comboMoves.length > 0) {
       let values = this.state.comboMoves.map((x: any) => parseInt(x.value))
       for (let i = 0; i < values.length; i++) {
@@ -192,6 +218,8 @@ export class SearchForm extends React.Component<any, any> {
     query += ` ORDER BY ${this.state.sortField} ${this.state.sortDir} LIMIT ${this.state.pageSize} OFFSET ${offset}`
     queryObject = queryObject ? queryObject : ''
     let startTime = Date.now();
+    console.log(query);
+    console.log(queryObject);
     let prepQuery = db.prepare(query);
     let searchConversions = queryObject ? prepQuery.all(queryObject) : prepQuery.all();
     let maxPageCount = searchConversions.length > 0 ? Math.ceil(searchConversions[0].total / this.state.pageSize) : 1;
@@ -363,6 +391,10 @@ export class SearchForm extends React.Component<any, any> {
               </div>
               <div>
                 <FormControlLabel control={<Checkbox />} label="Exclude assigned conversions?" onChange={this.handleInputChange} name="excludeAssigned" checked={this.state.excludeAssigned} />
+              </div>
+              <div>
+                Game is AFTER date: <DatePicker selected={this.state.afterDate} onChange={(date:Date) => this.handleDateChange(date, 'afterDate')} name='afterDate'/>
+                Game is BEFORE date: <DatePicker selected={this.state.beforeDate} onChange={(date:Date) => this.handleDateChange(date, 'beforeDate')} name='beforeDate'/>
               </div>
               <div>
                 <Autocomplete

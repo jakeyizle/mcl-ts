@@ -169,7 +169,7 @@ async function recordReplayWithOBS(replayCommand: string) {
           if (command[0] === '[NO_GAME]') {
             console.log('stopRecord');
             let recordingStatus = await obs.send("GetRecordingStatus");
-            fileName ?? recordingStatus.recordingFilename;
+            fileName = recordingStatus.recordingFilename || '';
             await obs.send("StopRecording");
             spawnSync("taskkill", ["/pid", `${dolphinProcess.pid}`, '/f', '/t']);
             recordingStarted = false;

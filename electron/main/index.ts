@@ -116,6 +116,7 @@ function initDB() {
       ,zeroToDeath
       ,moveString
       ,damagePerFrame
+      ,date
       ,FOREIGN KEY (filepath) REFERENCES games(path)
   )`).run();
   const movesStmt = db.prepare(`CREATE TABLE IF NOT EXISTS moves (

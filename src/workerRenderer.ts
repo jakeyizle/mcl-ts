@@ -18,7 +18,7 @@ ipcRenderer.on('startLoad', async (event, message: { start: number, range: numbe
     const db = require('better-sqlite3')(join(appDataPath,'melee.db'));
 
     const insertGame = db.prepare("INSERT OR IGNORE INTO GAMES (name, path) VALUES (@name, @path)");
-    const insertConversion = db.prepare("INSERT OR IGNORE INTO conversions (damagePerFrame, moveString, zeroToDeath, startAt, moveCount, id, filepath, playerIndex,opponentIndex,startFrame,endFrame,startPercent,currentPercent,endPercent,didKill,openingType,attackingPlayer,defendingPlayer,attackingCharacter,defendingCharacter,stage,percent,time) VALUES (@damagePerFrame, @moveString, @zeroToDeath, @startAt, @moveCount, @id, @filePath, @playerIndex,@opponentIndex,@startFrame,@endFrame,@startPercent,@currentPercent,@endPercent,@didKill,@openingType,@attackingPlayer,@defendingPlayer,@attackingCharacter,@defendingCharacter,@stage,@percent,@time)")
+    const insertConversion = db.prepare("INSERT OR IGNORE INTO conversions (date, damagePerFrame, moveString, zeroToDeath, startAt, moveCount, id, filepath, playerIndex,opponentIndex,startFrame,endFrame,startPercent,currentPercent,endPercent,didKill,openingType,attackingPlayer,defendingPlayer,attackingCharacter,defendingCharacter,stage,percent,time) VALUES (@date, @damagePerFrame, @moveString, @zeroToDeath, @startAt, @moveCount, @id, @filePath, @playerIndex,@opponentIndex,@startFrame,@endFrame,@startPercent,@currentPercent,@endPercent,@didKill,@openingType,@attackingPlayer,@defendingPlayer,@attackingCharacter,@defendingCharacter,@stage,@percent,@time)")
     const insertMove = db.prepare("INSERT OR IGNORE INTO MOVES (inverseMoveIndex, conversionId,moveId,frame,hitCount,damage, moveIndex) VALUES (@inverseMoveIndex, @conversionId,@moveId,@frame,@hitCount,@damage, @moveIndex)");
     const insertError = db.prepare("INSERT OR IGNORE INTO errorGame (name, path, reason) VALUES (@name, @path, @reason)");
     let currentFile: any;
@@ -58,6 +58,9 @@ ipcRenderer.on('startLoad', async (event, message: { start: number, range: numbe
           }
           //otherwise all conversions in a game have same startAt date
           conversions[j].startAt = metadata?.startAt + `${conversions[j].startFrame}F`;
+          //everything until T
+          let dateRegEx = /^[^T]*/;
+          conversions[j].date = dateRegEx.exec(metadata!.startAt!)?.[0] ?? '';
           conversions[j].zeroToDeath = conversions[j].startPercent === 0 && conversions[j].didKill == 1 ? 1 : 0;
           //changing string from 10,12,13 to ,10,12,13, prevents weird search issues
           //LIKE %0,1% will return the above. By adding commas we can do LIKE %,0,1,%
@@ -132,6 +135,7 @@ declare module '@slippi/slippi-js' {
     startAt: string,
     zeroToDeath: number,
     moveString: string,
+    date: string
   }
 
   interface MoveLandedType {
