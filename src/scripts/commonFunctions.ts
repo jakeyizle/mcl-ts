@@ -133,6 +133,7 @@ async function recordReplayWithOBS(replayCommand: string) {
       obs.connect({ address: `localhost:${obsPort}`, password: obsPassword });
       let startFrame: number;
       let endFrame: number;
+      let gameEndFrame: number;
       let currentFrame: number;
       let recordingStarted: Boolean;
       let fileName: string;
@@ -142,12 +143,15 @@ async function recordReplayWithOBS(replayCommand: string) {
         const commands = split(line, "\r\n");
         each(commands, async (command: any) => {
           command = split(command, " ");
-          // console.log(command);
+          console.log(command);
           if (command[0] === '[PLAYBACK_START_FRAME]') {
             startFrame = parseInt(command[1]);
           }
           if (command[0] === '[PLAYBACK_END_FRAME]') {
             endFrame = parseInt(command[1]);
+          }
+          if (command[0] === '[GAME_END_FRAME]') {
+            gameEndFrame = parseInt(command[1]);
           }
           if (command[0] === '[CURRENT_FRAME]') {
             currentFrame = parseInt(command[1]);
@@ -161,7 +165,7 @@ async function recordReplayWithOBS(replayCommand: string) {
                 obs.send("ResumeRecording").catch((err: any) => console.log(err));
               }
             }
-            if (currentFrame == endFrame) {
+            if (currentFrame == endFrame || currentFrame == gameEndFrame) {
               console.log('pauseRecord');
               obs.send("PauseRecording").catch((err: any) => console.log(err));
             }

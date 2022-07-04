@@ -108,9 +108,10 @@ export default class PlaylistForm extends React.Component<any, any> {
     let value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
     if (name === 'recordingName') {
+      //super slow and annoying and isn't correct
       //tests that filename is valid -- https://stackoverflow.com/a/53635003/18022439
-      let windowsFileRegex = /([<>:"\/\\|?*])|(\.|\s)$/ig
-      if (windowsFileRegex.test(value)) { return; }
+      // let windowsFileRegex = /([<>:"\/\\|?*])|(\.|\s)$/ig
+      // if (windowsFileRegex.test(value)) { return; }
     }
     if (target.type === 'file') {
       const path = target.files[0].path;
