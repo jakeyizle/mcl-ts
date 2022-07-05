@@ -25,6 +25,7 @@
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.8.6",
     "@mui/x-data-grid": "^5.12.3",
+    "@playwright/test": "^1.23.1",
     "@slippi/slippi-js": "^6.2.1",
     "better-sqlite3": "^7.5.3",
     "cross-env": "^7.0.3",
