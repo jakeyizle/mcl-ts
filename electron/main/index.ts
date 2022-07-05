@@ -39,7 +39,8 @@ async function createWindow() {
     },
   })
 
-  if (app.isPackaged) {
+  if (app.isPackaged || process.env['IS_TEST']) {
+    console.log(join(__dirname, '../../index.html'));
     win.loadFile(join(__dirname, '../../index.html'))
   } else {
     win.loadURL(url)
