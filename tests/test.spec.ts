@@ -1,6 +1,7 @@
 import type { ElectronApplication } from 'playwright';
 import { _electron as electron } from 'playwright';
-import { afterAll, beforeAll, expect, test } from 'vitest';
+import {expect} from '@playwright/test';
+import { afterAll, beforeAll, test } from 'vitest';
 import { createHash } from 'crypto';
 import { join } from 'path'
 
@@ -18,40 +19,17 @@ afterAll(async () => {
   await electronApp.close();
 });
 
-
-test('Main window state', async () => {
-  const windowState: { isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean }
-    = await electronApp.evaluate(({ BrowserWindow }) => {
-      const mainWindow = BrowserWindow.getAllWindows()[0];
-      console.log(1);
-      const getState = () => ({
-        isVisible: mainWindow.isVisible(),
-        isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
-        isCrashed: mainWindow.webContents.isCrashed(),
-      });
-      console.log(2);
-      return new Promise((resolve) => {
-        if (mainWindow.isVisible()) {
-          console.log(3);
-          resolve(getState());
-        } else
-        console.log(4);
-          mainWindow.once('ready-to-show', () => setTimeout(() => resolve(getState()), 0));
-      });
-    });
-    console.log(5);
-  expect(windowState.isCrashed, 'App was crashed').toBeFalsy();
-  console.log(6);
-  expect(windowState.isVisible, 'Main window was not visible').toBeTruthy();
-  console.log(7);
-  expect(windowState.isDevToolsOpened, 'DevTools was opened').toBeFalsy();
-  console.log(8);
-});
-
-
 test('Main window web content', async () => {
   const page = await electronApp.firstWindow();
   const element = await page.$('#root', { strict: true });
   expect(element, 'Can\'t find root element').toBeDefined();
-  expect((await element!.innerHTML()).trim(), 'Window content was empty').not.equal('');
+  expect((await element!.innerHTML()).trim(), 'Window content was empty').not.toBe('');
 });
+
+test('Can click on settings', async () => {
+  const page = await electronApp.firstWindow();
+  const settingsElement = page.locator('.Settings');
+  await expect(settingsElement).toHaveAttribute('style', 'display: none;')
+  await page.locator(`[name='Settings']`).click();
+  await expect(settingsElement).toHaveAttribute('style', 'display: block;')
+})
