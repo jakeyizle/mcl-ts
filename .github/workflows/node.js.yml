@@ -31,5 +31,6 @@ jobs:
       - name: Test if ubuntu
         if: matrix.os == 'ubuntu-latest'
         uses: GabrielBB/xvfb-action@v1
-        run: npm run test
+        with:
+          run: npm run test
       - run: npm run build
