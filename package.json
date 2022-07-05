@@ -9,14 +9,11 @@
   "main": "dist/electron/main/index.js",
   "scripts": {
     "dev": "vite",
-    "localBuild": "tsc && vite build && electron-builder",
+    "build-local": "tsc && vite build && electron-builder",
     "build": "tsc && vite build && electron-builder --publish=always",
     "postinstall": "electron-builder install-app-deps",
     "release": "electron-builder",
-    "test": "vite build && cross-env IS_TEST=true vitest",
-    "vite_build": "vite build",
-    "blah": "",
-    "blah-dev": "cross-env IS_TEST=true vite"
+    "test": "vite build && cross-env IS_TEST=true vitest"
   },
   "engines": {
     "node": ">=14.17.0"
