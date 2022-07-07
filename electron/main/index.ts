@@ -6,7 +6,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import { autoUpdater } from "electron-updater";
 autoUpdater.checkForUpdatesAndNotify()
 
-const appDataPath = app.getPath('appData');
+const appDataPath = process.env['IS_TEST'] ? '' : app.getPath('appData');
 import Database from '../../src/scripts/database'
 const db = Database.GetInstance(appDataPath);
 
@@ -155,6 +155,9 @@ function initDB() {
   db.prepare('CREATE INDEX IF NOT EXISTS count_index ON conversions (id)').run();
   db.prepare('CREATE INDEX IF NOT EXISTS attacking_index ON conversions (attackingPlayer)').run();
   db.prepare('CREATE INDEX IF NOT EXISTS defending_index ON conversions (defendingPlayer)').run();
+  if (process.env['IS_TEST']) {
+    Database.SetReplayDirectoryForTest()
+  }
 }
 
 // In this file you can include the rest of your app's specific main process
@@ -219,12 +222,12 @@ const createInvisWindow = (start: number, range: number, files: { path: string; 
       contextIsolation: false,
     },
   });
-  if (app.isPackaged) {
+  if (app.isPackaged || process.env['IS_TEST']) {
     invisWindow.loadFile(join(__dirname, '../../workerRenderer.html'))
   } else {
     invisWindow.loadURL(workerUrl)
     //react dev tools does not appreciate other windows having dev tools open
-    //invisWindow.webContents.openDevTools()
+    invisWindow.webContents.openDevTools()
   }
   invisWindow.webContents.once('did-finish-load', () => {
     invisWindow.webContents.send('startLoad', { start: start, range: range, files: files, appDataPath: appDataPath })
@@ -269,7 +272,7 @@ ipcMain.on('getAppDataPath', (event) => {
   event.returnValue = appDataPath;
 })
 
-ipcMain.handle('showOpenDialog', async (event, args)=> {
+ipcMain.handle('showOpenDialog', async (event, args) => {
   let folder = await dialog.showOpenDialog({ properties: ['openDirectory'] })
   return folder.filePaths;
 })

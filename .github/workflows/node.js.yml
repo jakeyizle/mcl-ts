@@ -28,8 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm install
-      - name: Test
-        # if: matrix.os == 'ubuntu-latest'
+      - name: E2E Test
         uses: GabrielBB/xvfb-action@v1
         with:
           run: npm run test

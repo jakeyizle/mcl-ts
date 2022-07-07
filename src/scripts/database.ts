@@ -15,11 +15,22 @@ class DatabaseConnection {
     }
     this._appDataPath ||= appDataPath;
     if (!appDataPath && !this._appDataPath) {
+      try {
       this._appDataPath = ipcRenderer.sendSync('getAppDataPath');
+      }
+      catch (e) {
+        this._appDataPath = '';
+      }
     }
     this._instance = new Database(join(this._appDataPath, 'melee.db'));
     this._instance.pragma('journal_mode = WAL');
     return this._instance;
+  }
+
+  public static SetReplayDirectoryForTest = () => {
+    const dir = join(__dirname, '../../../tests/resources/');
+    const settingsUpsert = this._instance.prepare('INSERT INTO settings (key, value) values (@key, @value) ON CONFLICT (key) DO UPDATE SET value = @value');
+    settingsUpsert.run({key: 'replayPath', value: dir});
   }
 }
 
