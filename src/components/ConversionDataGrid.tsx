@@ -34,6 +34,8 @@ export default class ConversionDataGrid extends React.Component<any, any> {
           return (
             <FormControl sx={{ m: 1, width: 1000 }}>
               <Autocomplete
+                className="playlistDropdown"
+                autoHighlight
                 //have to update playlists on open, else you can add them and not see them
                 onOpen={() => this.setPlaylistOptions()}
                 options={this.state.playlistAutocompleteOptions}

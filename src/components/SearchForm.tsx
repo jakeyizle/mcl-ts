@@ -38,7 +38,7 @@ export class SearchForm extends React.Component<any, any> {
       sortDir: 'desc',
       fields: fields,
       conversionCount: undefined,
-      pageSize: 20,
+      pageSize: 10,
       comboContains: [],
       comboStartsWith: [],
       comboEndsWith: [],
@@ -456,7 +456,7 @@ export class SearchForm extends React.Component<any, any> {
           {this.state.conversions.length > 0
             ? <div>
               <Button variant="contained" onClick={() => this.clearConversions()}>Go back to search</Button>
-              <div style={{ height: '900px', width: '100%' }}>
+              <div style={{ height: '900px', width: '100%' }} id='ConversionTable'>
                 <ConversionDataGrid data={this.state.conversions} maxCount={this.state.conversionCount} handlePageChange={(pageNumber: any) => this.setPage(pageNumber)}
                   handleSortModelChange={(e: any) => this.handleSortModelChange(e)} handlePageSize={(newPageSize: any) => this.handlePageSize(newPageSize)} pageSize={this.state.pageSize}
                   sortModel={[{ field: this.state.sortField, sort: this.state.sortDir }]}

@@ -210,6 +210,7 @@ export default class PlaylistForm extends React.Component<any, any> {
         <div>
           <FormControl sx={{ m: 1, width: 200 }}>
             <Autocomplete
+              id='playlistDropdown'
               value={this.state.selectedPlaylist}
               options={this.state.playlists}
               renderInput={(params) => (<TextField {...params} label="Playlist" variant="standard" />)}
@@ -249,7 +250,7 @@ export default class PlaylistForm extends React.Component<any, any> {
           ? <div>
             <div style={{ height: 600, width: '100%' }}>
               <div style={{ display: 'flex', height: '100%' }}>
-                <div style={{ flexGrow: 1 }}>
+                <div style={{ flexGrow: 1 }} id='playlistConversionTable'>
                   <ConversionDataGrid data={this.state.conversions} isPlaylistGrid={true} onOrderChange={this.handleOrderChange} onConversionRemove={this.handleConversionRemove} />
                 </div>
               </div>

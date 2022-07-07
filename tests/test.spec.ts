@@ -44,7 +44,30 @@ test('Can upload replays', async () => {
   await expect(page.homePage).toContainText('8 games and 278 conversions loaded', {timeout: 30000});
 })
 
+test('Can search replays', async () => {
+  const page = new App(await electronApp.firstWindow());
+  await page.searchNav.click();
+  await page.searchButton.click();
+  await expect(page.conversionTable).toBeVisible();
+})
 
+test('Can add replays to playlist', async() => {
+  const page = new App(await electronApp.firstWindow());
+  await page.getNav('Playlists').click();
+  await page.playlistDropdown.type('testPlaylist');
+  await page.page.keyboard.press('Enter');
+  await page.getNav('Search').click();
+  // test is dependent on previous test :(
+  // await page.searchButton.click();
+  let count = await page.searchFormPlaylistDropdowns.count();
+  console.log(count)
+  for (let i = 0; i < count; i ++) {
+    await page.searchFormPlaylistDropdowns.nth(i).click();
+    await page.page.keyboard.press('Enter');
+  }
+  await page.getNav('Playlists').click();
+  expect(page.page.locator('text=1–10 of 10')).toBeDefined();
+})
 //for debugging
 function delay(time: number) {
   return new Promise(function(resolve) {
