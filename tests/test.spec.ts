@@ -4,7 +4,7 @@ import {expect} from '@playwright/test';
 import { afterAll, beforeAll, test } from 'vitest';
 import { join } from 'path'
 import {App} from './page'
-import {unlinkSync} from 'fs';
+import {unlinkSync, existsSync} from 'fs';
 let electronApp: ElectronApplication;
 const appPath = join(__dirname, '../dist/electron/main/index.js')
 
@@ -36,9 +36,9 @@ test('Can click on settings', async () => {
 test('Can upload replays', async () => {
   await electronApp?.close();
   const basePath = join(__dirname,'../melee.db');
-  unlinkSync(basePath);
-  unlinkSync(basePath+'-shm');
-  unlinkSync(basePath+'-wal')
+  if (existsSync(basePath)) unlinkSync(basePath);
+  if (existsSync(basePath+'-shm')) unlinkSync(basePath+'-shm');
+  if (existsSync(basePath+'-wal')) unlinkSync(basePath+'-wal')
   electronApp = await electron.launch({ args: [appPath] });
   const page = new App(await electronApp.firstWindow());
   await expect(page.homePage).toContainText('8 games and 278 conversions loaded', {timeout: 10000});
