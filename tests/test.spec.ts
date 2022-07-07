@@ -41,7 +41,7 @@ test('Can upload replays', async () => {
   if (existsSync(basePath+'-wal')) unlinkSync(basePath+'-wal')
   electronApp = await electron.launch({ args: [appPath] });
   const page = new App(await electronApp.firstWindow());
-  await expect(page.homePage).toContainText('8 games and 278 conversions loaded', {timeout: 10000});
+  await expect(page.homePage).toContainText('8 games and 278 conversions loaded', {timeout: 30000});
 })
 
 
