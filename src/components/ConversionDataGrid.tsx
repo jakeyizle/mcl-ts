@@ -144,6 +144,7 @@ export default class ConversionDataGrid extends React.Component<any, any> {
             components={{
               Toolbar: CustomToolbar,
             }}
+            density='compact'
           />
           : <DataGrid rowHeight={100}
             rows={this.props.data}
@@ -164,6 +165,7 @@ export default class ConversionDataGrid extends React.Component<any, any> {
             components={{
               Toolbar: CustomToolbar,
             }}
+            density='compact'
           />}
       </span>
     )

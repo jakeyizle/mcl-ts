@@ -68,6 +68,7 @@ test('Can add replays to playlist', async() => {
   await page.getNav('Playlists').click();
   expect(page.page.locator('text=1–10 of 10')).toBeDefined();
 })
+
 //for debugging
 function delay(time: number) {
   return new Promise(function(resolve) {
