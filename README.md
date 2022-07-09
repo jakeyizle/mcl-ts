@@ -33,17 +33,17 @@ How to use:
         Recording method - Dolphin framedump or OBS (see below)
     Recordings:
         There are 2 methods to recording, each with their own pros/cons:
+        (game music can be disabled by opening Playback Dolphin -> Right click your SSBM ISO -> Properties -> Gecko Codes -> Optional: Game Music OFF)
         Dolphin framedump
             PROS:
                 Recordings should always be at 60fps
                 Can control resolution by opening Playback Dolphin -> Graphics -> Enhancements (Set desired resolution), then -> Advanced (Full Resolution Frame Dumps)
             CONS:
                 Slow, based on what you set the resolution to
-                No audio at all at the moment
+                There's like a green line on the right side?
         OBS Websocket - you must install OBS, then OBS Websocket, then set the OBS password and port. You must have started OBS before you record
             PROS:
                 Much faster
-                Has game audio (game music can be disabled by opening Playback Dolphin -> Right click your SSBM ISO -> Properties -> Gecko Codes -> Optional: Game Music OFF
             CONS:
                 If your replay stutters, the recording will stutter
                 Will record audio from other sources on your computer

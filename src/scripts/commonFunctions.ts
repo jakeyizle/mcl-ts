@@ -6,6 +6,9 @@ import each from "lodash/each";
 import OBSWebsocket from 'obs-websocket-js';
 import Database from './database'
 import { ipcRenderer } from 'electron';
+import util from 'util';
+const execPromise = util.promisify(require('child_process').exec);
+var pathToFfmpeg = require('ffmpeg-static').replace('app.asar', 'app.asar.unpacked');
 const db = Database.GetInstance();
 const settingsStmt = db.prepare('SELECT value from settings where key = ?');
 
@@ -27,24 +30,23 @@ export const playAndRecordConversions = async function playAndRecordConversions(
       const movieFolderPath = folderPath + dumpPath
       const movieDump = '\\framedump0.avi'
       const fullMoviePath = movieFolderPath + movieDump;
-      //its possible someone didnt do cleanup themselves - lets get rid of it
-      if (fs.existsSync(fullMoviePath)) {
-        let date = new Date().toJSON().replaceAll(':', '');
-        fs.renameSync(fullMoviePath, movieFolderPath + `\\${date}.avi`)
-      }
+      const audioPath = folderPath + 'User\\Dump\\Audio\\dspdump.wav';
+      const mergeCommand = `"${pathToFfmpeg}" -i "${fullMoviePath}" -i "${audioPath}" -c copy "${recordedFilePath}"`
       await playConversions(command);
-      let renameLoop = true;
-      //file gets locked for a little bit after dolphin closes
-      let i = 0;
-      while (renameLoop) {
-        i++
-        if (i > 10000) { return }
+      console.log(mergeCommand);
+      //dolphin wont let go of my toy
+      let mergeFail = true;
+      while (mergeFail) {
         try {
-          fs.copyFileSync(fullMoviePath, recordedFilePath)
-          fs.unlinkSync(fullMoviePath)
-          renameLoop = false;
-        } catch (e) { }
+          console.log('merging');
+          const { stderr } = await execPromise(mergeCommand);
+          console.log(stderr);
+          if (!stderr) { mergeFail = false };
+        } catch (e) {
+          console.log(e);
+        }
       }
+      return recordedFilePath;
     } else if (recordMethod === 'OBS') {
       disableOrEnableDolphinRecording(false);
       recordedFilePath += 'mkv'
@@ -187,17 +189,27 @@ async function recordReplayWithOBS(replayCommand: string) {
     }
   })
 }
-
+//TODO BETTER NAMING
 function disableOrEnableDolphinRecording(enable = false) {
   const folderPath = getPlaybackFolder()
   const configPath = 'User\\Config\\Dolphin.ini';
   const fullPlaybackPath = folderPath + configPath;
 
   const settingsRegExp = /(DumpFrames =).*/;
+  const audioSettingsRegExp = /(DumpAudio =).*/;
   const config = fs.readFileSync(fullPlaybackPath, 'utf-8');
   const newSetting = enable ? 'DumpFrames = True' : 'DumpFrames = False';
-  const newConfig = config.replace(settingsRegExp, newSetting);
-  fs.writeFileSync(fullPlaybackPath, newConfig);
+  const newAudioSetting = enable ? 'DumpAudio = True' : 'DumpAudio = False';
+  const newConfig = config.replace(settingsRegExp, newSetting).replace(audioSettingsRegExp, newAudioSetting);
+
+  //auto deletes files for us
+  //could probably leave True?
+  const silentFrameDumpExp = /(DumpFramesSilent =).*/;
+  const frameSetting = enable ? 'DumpFramesSilent = True' : 'DumpFramesSilent = False'
+  const silentAudioDumpExp = /(DumpAudioSilent =).*/;
+  const audioSetting = enable ? "DumpAudioSilent = True" : 'DumpAudioSilent = False'
+  const finalConfig = newConfig.replace(silentFrameDumpExp, frameSetting).replace(silentAudioDumpExp, audioSetting)
+  fs.writeFileSync(fullPlaybackPath, finalConfig);
 }
 
 function getPlaybackFolder() {
