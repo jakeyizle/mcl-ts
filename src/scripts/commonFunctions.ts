@@ -22,6 +22,7 @@ export const playAndRecordConversions = async function playAndRecordConversions(
     const recordMethod = settingsStmt.get('recordMethod')?.value;
     const fileName: string = recordingName || new Date().toJSON().replaceAll(':', '');
     let recordedFilePath = recordingPath + `${fileName}.`
+    //TODO better organization
     if (recordMethod === 'Dolphin') {
       disableOrEnableDolphinRecording(true);
       recordedFilePath += 'avi'
@@ -31,21 +32,34 @@ export const playAndRecordConversions = async function playAndRecordConversions(
       const movieDump = '\\framedump0.avi'
       const fullMoviePath = movieFolderPath + movieDump;
       const audioPath = folderPath + 'User\\Dump\\Audio\\dspdump.wav';
-      const mergeCommand = `"${pathToFfmpeg}" -i "${fullMoviePath}" -i "${audioPath}" -c copy "${recordedFilePath}"`
+      const mergePath = movieFolderPath + '\\video.avi';
+      //add audio to video
+      const mergeCommand = `"${pathToFfmpeg}" -i "${fullMoviePath}" -i "${audioPath}" -c copy "${mergePath}"`
+      //remove green line that shows in recordings
+      const editCommand = `"${pathToFfmpeg}" -i "${mergePath}" -filter:v "crop=iw-1:ih:0:0" "${recordedFilePath}"`;
+
       await playConversions(command);
       console.log(mergeCommand);
+      console.log(editCommand);
       //dolphin wont let go of my toy
-      let mergeFail = true;
-      while (mergeFail) {
+
+      while (true) {
         try {
-          console.log('merging');
-          const { stderr } = await execPromise(mergeCommand);
-          console.log(stderr);
-          if (!stderr) { mergeFail = false };
-        } catch (e) {
+          //without timeout command never returns?
+          await execPromise(mergeCommand, { timeout: 5000 });
+          break
+        }
+        catch (e) {
           console.log(e);
         }
       }
+      while (true) {
+        try {
+          await execPromise(editCommand, { timeout: 5000 })
+          break;
+        } catch (e) { console.log(e) }
+      }
+      fs.unlinkSync(mergePath);
       return recordedFilePath;
     } else if (recordMethod === 'OBS') {
       disableOrEnableDolphinRecording(false);

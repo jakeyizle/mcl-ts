@@ -40,7 +40,6 @@ How to use:
                 Can control resolution by opening Playback Dolphin -> Graphics -> Enhancements (Set desired resolution), then -> Advanced (Full Resolution Frame Dumps)
             CONS:
                 Slow, based on what you set the resolution to
-                There's like a green line on the right side?
         OBS Websocket - you must install OBS, then OBS Websocket, then set the OBS password and port. You must have started OBS before you record
             PROS:
                 Much faster
