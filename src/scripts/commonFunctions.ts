@@ -34,9 +34,9 @@ export const playAndRecordConversions = async function playAndRecordConversions(
       const audioPath = folderPath + 'User\\Dump\\Audio\\dspdump.wav';
       const mergePath = movieFolderPath + '\\video.avi';
       //add audio to video
-      const mergeCommand = `"${pathToFfmpeg}" -i "${fullMoviePath}" -i "${audioPath}" -c copy "${mergePath}"`
+      const mergeCommand = `"${pathToFfmpeg}" -y -i "${fullMoviePath}" -i "${audioPath}" -c copy "${mergePath}"`
       //remove green line that shows in recordings
-      const editCommand = `"${pathToFfmpeg}" -i "${mergePath}" -filter:v "crop=iw-1:ih:0:0" "${recordedFilePath}"`;
+      const editCommand = `"${pathToFfmpeg}" -y -i "${mergePath}" -filter:v "crop=iw-1:ih:0:0" "${recordedFilePath}"`;
 
       await playConversions(command);
       console.log(mergeCommand);
