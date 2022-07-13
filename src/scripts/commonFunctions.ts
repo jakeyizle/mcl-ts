@@ -47,17 +47,12 @@ export const playAndRecordConversions = async function playAndRecordConversions(
         try {
           //without timeout command never returns?
           await execPromise(mergeCommand, { timeout: 5000 });
+          await execPromise(editCommand, { timeout: 5000 })
           break
         }
         catch (e) {
           console.log(e);
         }
-      }
-      while (true) {
-        try {
-          await execPromise(editCommand, { timeout: 5000 })
-          break;
-        } catch (e) { console.log(e) }
       }
       fs.unlinkSync(mergePath);
       return recordedFilePath;
