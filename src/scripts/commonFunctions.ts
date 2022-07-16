@@ -42,18 +42,9 @@ export const playAndRecordConversions = async function playAndRecordConversions(
       console.log(mergeCommand);
       console.log(editCommand);
       //dolphin wont let go of my toy
-
-      while (true) {
-        try {
-          //without timeout command never returns?
-          await execPromise(mergeCommand, { timeout: 5000 });
-          await execPromise(editCommand, { timeout: 5000 })
-          break
-        }
-        catch (e) {
-          console.log(e);
-        }
-      }
+      //wrap this is in a try/catch and on fail show ui error
+      await executeUntilSuccess(mergeCommand);
+      await executeUntilSuccess(editCommand);
       fs.unlinkSync(mergePath);
       return recordedFilePath;
     } else if (recordMethod === 'OBS') {
@@ -225,6 +216,32 @@ function getPlaybackFolder() {
   const regExp = /(.*\\)/;
   const playbackPath = settingsStmt.get('dolphinPath').value;
   return regExp.exec(playbackPath)![0];
+}
+
+async function executeUntilSuccess(command: string, timeout: number = 5000, tryLimit: number = 1000) {
+  let i = 0
+  return new Promise<void>(async (resolve, reject) => {
+    while (i < tryLimit) {
+      i++
+      try {
+        let { stdErr } = await execPromise(command, { timeout: timeout });
+        if (!stdErr) {
+          resolve()
+          break;
+        };
+      } catch (e) {
+      } finally {
+        await sleep(100);
+      }
+    }
+    reject();
+  })
+}
+
+async function sleep(delay = 0) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
 }
 
 export const showOpenDialog = async () => {
