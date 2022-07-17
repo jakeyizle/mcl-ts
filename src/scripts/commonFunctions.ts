@@ -39,12 +39,13 @@ export const playAndRecordConversions = async function playAndRecordConversions(
       const editCommand = `"${pathToFfmpeg}" -y -i "${mergePath}" -filter:v "crop=iw-1:ih:0:0" "${recordedFilePath}"`;
 
       await playConversions(command);
-      console.log(mergeCommand);
-      console.log(editCommand);
       //dolphin wont let go of my toy
       //wrap this is in a try/catch and on fail show ui error
+      console.log('merge');
       await executeUntilSuccess(mergeCommand);
+      console.log('edit');
       await executeUntilSuccess(editCommand);
+      console.log('finish video process')
       fs.unlinkSync(mergePath);
       return recordedFilePath;
     } else if (recordMethod === 'OBS') {
@@ -82,7 +83,7 @@ export const isOBSOn = async function isOBSOn() {
 }
 
 async function playConversions(replayCommand: string) {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     var dolphinProcess = exec(replayCommand);
     dolphinProcess?.stdout?.on('data', (line) => {
       if (line.includes('[NO_GAME]')) {
@@ -127,12 +128,12 @@ function getReplayCommand(conversions: any) {
 }
 
 async function recordReplayWithOBS(replayCommand: string) {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<string>(async (resolve, reject) => {
     try {
       const obsPassword = settingsStmt.get('obsPassword').value;
       const obsPort = settingsStmt.get('obsPort').value;
       const obs = new OBSWebsocket();
-      obs.connect({ address: `localhost:${obsPort}`, password: obsPassword });
+      await obs.connect({ address: `localhost:${obsPort}`, password: obsPassword });
       let startFrame: number;
       let endFrame: number;
       let gameEndFrame: number;
@@ -218,18 +219,21 @@ function getPlaybackFolder() {
   return regExp.exec(playbackPath)![0];
 }
 
-async function executeUntilSuccess(command: string, timeout: number = 5000, tryLimit: number = 1000) {
+async function executeUntilSuccess(command: string, tryLimit: number = 10) {
   let i = 0
   return new Promise<void>(async (resolve, reject) => {
     while (i < tryLimit) {
       i++
       try {
-        let { stdErr } = await execPromise(command, { timeout: timeout });
+        console.log(`attempt ${i}`)
+        let { stdErr } = await execPromise(command);
+        if (stdErr) console.log(stdErr);
         if (!stdErr) {
           resolve()
-          break;
+          return;
         };
       } catch (e) {
+        console.log(e);
       } finally {
         await sleep(100);
       }
