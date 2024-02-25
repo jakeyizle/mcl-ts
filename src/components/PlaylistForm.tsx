@@ -1,7 +1,7 @@
-import { Button, Box, TextField, Autocomplete, FormControl, createFilterOptions, Dialog, DialogTitle, DialogContent, DialogActions, Alert } from '@mui/material';
+import { Button, Box, TextField, Autocomplete, FormControl, createFilterOptions, Dialog, DialogTitle, DialogContent, DialogActions, Alert, Typography } from '@mui/material';
 import * as fs from 'fs'
 import * as React from 'react';
-import { playAndRecordConversions, isOBSOn, showOpenDialog } from '../scripts/commonFunctions.js'
+import { playAndRecordConversions, showOpenDialog } from '../scripts/commonFunctions.js'
 import ConversionDataGrid from './ConversionDataGrid.js';
 import Database from '../scripts/database'
 const db = Database.GetInstance();
@@ -12,7 +12,6 @@ const settingsUpsert = db.prepare('INSERT INTO settings (key, value) values (@ke
 export default class PlaylistForm extends React.Component<any, any> {
   recordingPath: any
   playDisabled: boolean;
-  recordDisabled: boolean;
   constructor(props: any) {
     super(props);
     let playlists = db.prepare('SELECT * from playlists').all().map((x: any) => ({ label: x.name, value: x.name }));
@@ -28,7 +27,6 @@ export default class PlaylistForm extends React.Component<any, any> {
       successRecording: ''
     }
     this.playDisabled = (settingsStmt.get('dolphinPath') && settingsStmt.get('isoPath')) ? false : true
-    this.recordDisabled = (settingsStmt.get('recordMethod') && !this.playDisabled) ? false : true;
     this.alterPlaylist = this.alterPlaylist.bind(this);
     this.handleAutocompleteInputChange = this.handleAutocompleteInputChange.bind(this);
     this.handleOrderChange = this.handleOrderChange.bind(this);
@@ -155,17 +153,10 @@ export default class PlaylistForm extends React.Component<any, any> {
       this.setState({ replayPathError: 'Please select a folder' })
       return
     }
-    let recordMethod = settingsStmt.get('recordMethod').value;
-    //todo: OBS can be set to record different file types
-    let fileExtension = recordMethod === 'OBS' ? '.mkv' : '.avi';
+    let fileExtension = '.avi';
     let filePath = this.state.recordingPath + this.state.recordingName + fileExtension
     if (fs.existsSync(filePath)) {
       this.setState({ replayPathError: `${filePath} already exists` })
-      return
-    }
-    // let OBSCanConnect = await isOBSOn();
-    if (recordMethod === 'OBS' && !await isOBSOn()) {
-      this.setState({ replayPathError: 'OBS is either not open or configured incorrectly' })
       return
     }
     let sucessFileName = await playAndRecordConversions(this.state.conversions, true, this.state.recordingPath, this.state.recordingName)
@@ -203,7 +194,6 @@ export default class PlaylistForm extends React.Component<any, any> {
   }
   render() {
     this.playDisabled = (settingsStmt.get('dolphinPath') && settingsStmt.get('isoPath')) ? false : true
-    this.recordDisabled = (settingsStmt.get('recordMethod') && !this.playDisabled) ? false : true;
     return (
       <div>
         {this.state.successRecording && <Alert severity="success">Succesfully recorded {this.state.successRecording}</Alert>}
@@ -256,7 +246,7 @@ export default class PlaylistForm extends React.Component<any, any> {
               </div>
             </div>
             <Button id="playPlaylistReplays" onClick={(e) => playAndRecordConversions(this.state.conversions)} disabled={this.playDisabled}>Play all Replays</Button>
-            <Button id="recordPlaylistReplays" onClick={(e) => this.handleDialogOpen()} disabled={this.recordDisabled}>Record all Replays</Button>
+            <Button id="recordPlaylistReplays" onClick={(e) => this.handleDialogOpen()} disabled={this.playDisabled}>Record all Replays</Button>
           </div>
           : this.state.selectedPlaylist === ''
             ? <div>Select/Create a playlist </div>
@@ -274,6 +264,7 @@ export default class PlaylistForm extends React.Component<any, any> {
             </DialogContent>
             <DialogContent>
               <TextField autoFocus fullWidth label="File name" name="recordingName" value={this.state.recordingName} onChange={(e) => this.handleInputChange(e)}></TextField>
+              <Typography>File extension will be .avi</Typography>
             </DialogContent>
             <DialogActions>
               <Button name="Cancel" onClick={(e) => this.handleDialogClose(false, e)}>Cancel</Button>

@@ -1,5 +1,5 @@
 The idea behind this project is to be able to search your combos and make/record several combos back-to-back (a playlist).
-Currently this supports native Dolphin recording, and using OBS.
+Currently this supports only native Dolphin recording
 
 PLATFORMS:
 
@@ -29,23 +29,9 @@ How to use:
         Recording Path - where you want recordings to be saved
         Preroll frames - This will start combos earlier, so "30" would start the combo 30 frames before it actually begins
         Postroll frames - This will extend the end of the combo, so "45" would include 45 frames after the end of the combo
-        obsPassword/obsPort - OBS Websocket settings found in OBS -> Tools -> WebSockets Server Settings. BOTH must be set to use OBS recordings (see below)
-        Recording method - Dolphin framedump or OBS (see below)
     Recordings:
-        There are 2 methods to recording, each with their own pros/cons:
-        (game music can be disabled by opening Playback Dolphin -> Right click your SSBM ISO -> Properties -> Gecko Codes -> Optional: Game Music OFF)
-        Dolphin framedump
-            PROS:
-                Recordings should always be at 60fps
-                Can control resolution by opening Playback Dolphin -> Graphics -> Enhancements (Set desired resolution), then -> Advanced (Full Resolution Frame Dumps)
-            CONS:
-                Slow, based on what you set the resolution to
-        OBS Websocket - you must install OBS, then OBS Websocket, then set the OBS password and port. You must have started OBS before you record
-            PROS:
-                Much faster
-            CONS:
-                If your replay stutters, the recording will stutter
-                Will record audio from other sources on your computer
+        OBS is no longer supported because I'm lazy.
+        You should open your playback dolphin GFX settings up the bitrate A LOT
 
 TODO (no particular order):
 

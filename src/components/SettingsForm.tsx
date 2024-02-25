@@ -27,9 +27,6 @@ export default class SettingsForm extends React.Component<any, any> {
       dolphinPath: '',
       preRoll: '',
       postRoll: '',
-      obsPassword: '',
-      obsPort: '',
-      recordMethod: false,
       recordingPath: ''
     }
   }
@@ -127,19 +124,6 @@ export default class SettingsForm extends React.Component<any, any> {
         </div>
         <div>
           <TextField label="postRoll frames" InputLabelProps={{ shrink: true }} type="number" placeholder="postRoll frames" onChange={(e) => this.handleInputChange(e)} name="postRoll" value={this.state.postRoll} />
-        </div>
-        <div>
-          <TextField label="obsPassword" InputLabelProps={{ shrink: true }} type="password" placeholder="obsPassword" onChange={(e) => this.handleInputChange(e)} name="obsPassword" value={this.state.obsPassword} />
-        </div>
-        <div>
-          <TextField label="obsPort" type="number" placeholder="obsPort" onChange={(e) => this.handleInputChange(e)} name="obsPort" value={this.state.obsPort} />
-        </div>
-        <div>
-          <FormLabel>Select recording method</FormLabel>
-          <RadioGroup row name="recordMethod" onChange={(e) => this.handleInputChange(e)} value={this.state.recordMethod}>
-            <FormControlLabel value="Dolphin" control={<Radio />} label="Dolphin" />
-            <FormControlLabel value="OBS" control={<Radio />} label="OBS" />
-          </RadioGroup>
         </div>
       </Box>
 
