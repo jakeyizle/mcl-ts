@@ -170,7 +170,14 @@ export default class PlaylistForm extends React.Component<any, any> {
     for (const conversion of this.state.conversions) {
       sum += conversion.time
     }
-    let seconds = Math.round(sum / 60);
+    let seconds = sum / 60;
+
+    const preRoll = parseInt(settingsStmt.get("preRoll")?.value) || 0;
+    const preRollSeconds = preRoll * this.state.conversions.length / 60
+    const postRoll = parseInt(settingsStmt.get("postRoll")?.value) || 0;
+    const postRollSeconds = postRoll * this.state.conversions.length / 60
+
+    seconds = Math.round(seconds + preRollSeconds + postRollSeconds)
     return fmtMSS(seconds)
   }
 

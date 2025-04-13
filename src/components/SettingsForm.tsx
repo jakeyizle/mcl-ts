@@ -64,9 +64,14 @@ export default class SettingsForm extends React.Component<any, any> {
         const path = target.files[0]?.path;
         value = path;
         if (target.name === 'replayPath') {
-          //get the directory of a file
-          const regExp = /(.*\\)/;
-          value = regExp.exec(path)?.[0]!;
+          const fullPath = target.files[0].webkitRelativePath
+          // 'SlippiReplays/2024-05/Game_20240501T073330.slp'
+          // 'SlippiReplays'
+          const folder = fullPath.split('/')[0]
+          // get up to and including 'SlippiReplays'
+          const prefixPath = target.files[0]?.path.split(folder)[0]
+          debugger
+          value = prefixPath+folder+'\\'
         }
         break;
       case 'button':

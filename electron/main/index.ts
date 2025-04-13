@@ -274,5 +274,6 @@ ipcMain.on('getAppDataPath', (event) => {
 
 ipcMain.handle('showOpenDialog', async (event, args) => {
   let folder = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+  console.log(folder)
   return folder.filePaths;
 })

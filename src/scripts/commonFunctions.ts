@@ -4,6 +4,7 @@ import { exec, spawnSync } from "child_process";
 import Database from "./database";
 import { ipcRenderer } from "electron";
 import util from "util";
+import { SlippiGame } from "@slippi/slippi-js";
 const execPromise = util.promisify(require("child_process").exec);
 var pathToFfmpeg = require("ffmpeg-static").replace(
   "app.asar",
@@ -60,6 +61,10 @@ function getReplayCommand(conversions: any) {
     let startFrame = conversion.startFrame - preRoll;
     //javascript is fun (:
     let endFrame = conversion.endFrame + parseInt(postRoll);
+    //avoid long game end display
+    let game = new SlippiGame(conversion.filepath);
+    let lastFrame = game.getLatestFrame()?.frame;
+    if (lastFrame && endFrame >= lastFrame) endFrame = lastFrame - 1;
     var queueMessage = {
       path: conversion.filepath,
       startFrame: startFrame,
@@ -114,7 +119,7 @@ function getPlaybackFolder() {
   return regExp.exec(playbackPath)![0];
 }
 
-async function executeUntilSuccess(command: string, tryLimit: number = 10) {
+async function executeUntilSuccess(command: string, tryLimit: number = 40) {
   let i = 0;
   return new Promise<void>(async (resolve, reject) => {
     while (i < tryLimit) {
@@ -130,7 +135,7 @@ async function executeUntilSuccess(command: string, tryLimit: number = 10) {
       } catch (e) {
         console.log(e);
       } finally {
-        await sleep(100);
+        await sleep(500);
       }
     }
     reject();
@@ -201,7 +206,7 @@ async function recordDolphinClips(
     : path.join(__dirname, "concat.txt");
   fs.writeFileSync(concatFileName, concatFileText);
   // concat all clips into a single video
-  const concatCommand = `${pathToFfmpeg} -f concat -safe 0 -i "${concatFileName}" -c copy "${fullDestinationPath}"`;
+  const concatCommand = `"${pathToFfmpeg}" -f concat -safe 0 -i "${concatFileName}" -c copy "${fullDestinationPath}"`;
   console.log("concat", concatCommand);
   await executeUntilSuccess(concatCommand);
   cleanupMomentFiles();
