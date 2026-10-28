@@ -20,7 +20,7 @@ Download the latest installer from [Releases](https://github.com/jakeyizle/mcl-t
 | Replay parsing | `@slippi/slippi-js` |
 | Storage | SQLite via `better-sqlite3` |
 | Video | Slippi Dolphin frame dump + `ffmpeg-static` |
-| Tests / CI | Playwright driving the packaged Electron app, run on Windows, macOS and Linux by GitHub Actions |
+| Tests | Playwright E2E tests driving the built Electron app |
 
 ## Setup
 
@@ -39,10 +39,10 @@ Then open **Home** to import your replays, and use **Search** and **Playlists** 
 ```bash
 npm install
 npm run dev
-npm test        # builds, then runs the Playwright E2E suite against the Electron app
+npm test        # builds, then runs the E2E suite against the Electron app
 npm run build-local   # packages an installer into release/<version>/ without publishing
 ```
 
 ## Status
 
-Feature-complete for my own use and no longer under active development. Released builds are tested mainly on Windows. The local database has no migration system, so an update that changes the schema requires deleting the database and re-importing.
+Feature-complete for my own use and no longer under active development. Released builds are tested mainly on Windows, and the test suite predates current Electron and Playwright versions, so it needs dependency upgrades before it will run again. The local database has no migration system, so an update that changes the schema requires deleting the database and re-importing.
