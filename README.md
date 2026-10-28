@@ -40,7 +40,7 @@ Then open **Home** to import your replays, and use **Search** and **Playlists** 
 npm install
 npm run dev
 npm test        # builds, then runs the Playwright E2E suite against the Electron app
-npm run build   # packages an installer into release/
+npm run build-local   # packages an installer into release/<version>/ without publishing
 ```
 
 ## Status
