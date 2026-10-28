@@ -1,59 +1,48 @@
-The idea behind this project is to be able to search your combos and make/record several combos back-to-back (a playlist).
-Currently this supports only native Dolphin recording
+# Melee Combo Library
 
-PLATFORMS:
+A desktop app for Super Smash Bros. Melee players: it indexes every combo in your [Slippi](https://slippi.gg) replay folder, lets you search them, and plays back or records playlists of combos as a single video. Useful for finding your best moments, studying a matchup, or cutting a combo video.
 
-    Windows/Osx/Ubunutu
-    I have only tested the windows release 
+Download the latest installer from [Releases](https://github.com/jakeyizle/mcl-ts/releases/latest). It updates itself when a new version is published.
 
-Versioning:
+## Features
 
-    Updating should work
+- **Search every combo you've played.** Filter by player code, character, stage, damage range, move count, whether it killed, zero-to-deaths, or the exact sequence of moves a combo starts with, ends with or contains.
+- **Playlists.** Collect combos, reorder them, and play the whole list back in Slippi's Dolphin with configurable pre- and post-roll.
+- **Record to video.** Plays each combo through Dolphin's frame dump, merges the audio and video with ffmpeg, and concatenates the clips into one file.
+- **Fast import of large libraries.** Replays are parsed in parallel, one hidden renderer per CPU core, into a local SQLite database indexed for the search filters. Files already imported or known to be corrupt are skipped on later runs.
 
-Security:
+## How it's built
 
-    No
+| Concern | Choice |
+|---|---|
+| Shell | Electron + Vite, auto-updates via `electron-updater` and GitHub Releases |
+| UI | React, MUI (data grid for results) |
+| Replay parsing | `@slippi/slippi-js` |
+| Storage | SQLite via `better-sqlite3` |
+| Video | Slippi Dolphin frame dump + `ffmpeg-static` |
+| Tests / CI | Playwright driving the packaged Electron app, run on Windows, macOS and Linux by GitHub Actions |
 
-How to use:
+## Setup
 
-    Application Workflow:
-        Go to settings, set Replay Path (for replay loading). Set Iso/Playback path if you want to be able to play clips. Set recording options if you want to be able to record playlists.
-        Go to Home - this will start the replay loading process
-        Go to playlists and create playlists (you can't create them on the search page yet)
-        Go to search - here you can search for combos, watch them, and add them to playlists
-        Go to playlists - here you can order the combos, play the entire playlist, and play&record the entire playlist
-    Settings:
-        Replay Path - Select the folder where your Slippi replays are stored (usually like Documents\Slippi)
-        SSBM ISO Path - Select your SSBM ISO - any ISO that works with Slippi will work (ex: Animelee, Crystal, Diet)
-        Playback Dolphin Path - Open Slippi Launcher -> Settings -> Dolphin Settings -> Playback -> Open Containing Folder -> Use that Dolphin.exe. This is a special Dolphin for playing replays.
-        Recording Path - where you want recordings to be saved
-        Preroll frames - This will start combos earlier, so "30" would start the combo 30 frames before it actually begins
-        Postroll frames - This will extend the end of the combo, so "45" would include 45 frames after the end of the combo
-    Recordings:
-        OBS is no longer supported because I'm lazy.
-        You should open your playback dolphin GFX settings up the bitrate A LOT
+In **Settings**:
 
-TODO (no particular order):
+- **Replay path:** your Slippi replay folder (usually `Documents\Slippi`).
+- **SSBM ISO path:** any ISO that works with Slippi.
+- **Playback Dolphin path:** in the Slippi Launcher, open Settings → Dolphin Settings → Playback → Open Containing Folder, and choose that `Dolphin.exe`.
+- **Recording path:** where recorded videos are saved.
+- **Pre-roll / post-roll frames:** how much to show before and after each combo (e.g. 30 and 45).
 
-    Add option for gfycat uploading
-    Add option for recordings of playlists to be split into different files
-    More search options
-        AFTER/BEFORE date
-        True Combo?
-        DidKill take into account ragequits
-    Create playlists in dropdown in table
-    Game/converion stat breakdown
-        Form to select Player and get stats?
-        Show stats over time
-    Analysis of playlists to predict/suggest additions
-    Make the code consisent and look sane    
-    Conversion-level preroll/postroll overrides in playlists
-    Add loading icon to long operations
+Then open **Home** to import your replays, and use **Search** and **Playlists** from there. For better recordings, raise the bitrate in the playback Dolphin's graphics settings.
 
-ISSUES:
+## Development
 
-    Need database migration system, currently have to delete DB everytime
-        Electron update!    
-    First search call is slow
-        Not an index issue - it's a cold start issue
-    React components getting out of hand
+```bash
+npm install
+npm run dev
+npm test        # builds, then runs the Playwright E2E suite against the Electron app
+npm run build-local   # packages an installer into release/<version>/ without publishing
+```
+
+## Status
+
+Feature-complete for my own use and no longer under active development. Released builds are tested mainly on Windows. The local database has no migration system, so an update that changes the schema requires deleting the database and re-importing.
